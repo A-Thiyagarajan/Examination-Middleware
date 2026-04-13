@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL - ExamFlow Nexus</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <div class="nav-menu">
+        <a href="index.html#tech">Tech Stack</a>
+        <a href="index.html#architecture">Architecture</a>
+        <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/staff" target="_blank" rel="noopener noreferrer">Launch Project</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="tech-page-main">
+    <section class="tech-page-hero reveal">
+      <a class="back-link" href="index.html#tech">Back to Tech Stack</a>
+      <p class="eyebrow">Relational Storage Layer</p>
+      <h1 class="gradient-title">PostgreSQL</h1>
+      <p>Consistent relational database for users, submissions, artifacts, processing logs, and Moodle synchronization state.</p>
+    </section>
+
+    <section class="tech-page-grid">
+      <article class="tech-panel reveal">
+        <h2>Role In ExamFlow Nexus</h2>
+        <ul>
+          <li>PostgreSQL is the system of record behind the FastAPI middleware.</li>
+          <li>It stores users, students, staff identities, scanned-paper submissions, artifact references, subject mappings, processing queue records, processing logs, Moodle sync results, and audit logs.</li>
+          <li>It connects the scanned file world to the LMS world by keeping a reliable mapping between uploaded artifacts and verified students.</li>
+          <li>It protects the workflow from partial state because upload, verification, retry, and Moodle submission all require consistent database updates.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Architecture</h2>
+        <div class="db-architecture" aria-label="PostgreSQL database architecture diagram">
+          <div class="db-box db-users">Users</div>
+          <div class="db-arrow db-users-submissions">-&gt;</div>
+          <div class="db-box db-submissions">Submissions</div>
+          <div class="db-arrow db-submissions-artifacts">-&gt;</div>
+          <div class="db-box db-artifacts">Artifacts</div>
+          <div class="db-arrow db-artifacts-subjects">-&gt;</div>
+          <div class="db-box db-subjects">Subjects</div>
+
+          <div class="db-note db-fk-note">FK relationships</div>
+          <div class="db-arrow db-artifacts-down">↓</div>
+          <div class="db-arrow db-submissions-down">↓</div>
+          <div class="db-arrow db-users-down">↓</div>
+
+          <div class="db-box db-proc-queue">Proc Queue</div>
+          <div class="db-arrow db-proc-logs-arrow">-&gt;</div>
+          <div class="db-box db-proc-logs">Proc Logs</div>
+          <div class="db-box db-moodle-syncs">Moodle Syncs</div>
+          <div class="db-box db-audit-logs">Audit Logs</div>
+
+          <div class="db-note db-pipeline-note">processing pipeline linkage</div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Database Workflow</h2>
+        <pre class="snippet"><code>[ Insert ] -&gt; [ Map ] -&gt; [ Join ] -&gt; [ Update ] -&gt; [ Log ]</code></pre>
+        <ul>
+          <li><strong>Insert:</strong> staff upload creates artifact and submission rows.</li>
+          <li><strong>Map:</strong> filename metadata maps the artifact to a student and subject.</li>
+          <li><strong>Join:</strong> student dashboard joins users, submissions, artifacts, and subjects to show only authorized records.</li>
+          <li><strong>Update:</strong> status changes from uploaded to processed, verified, queued, submitted, or failed.</li>
+          <li><strong>Log:</strong> processing logs and Moodle sync logs record every important transition for auditability.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why PostgreSQL</h2>
+        <ul>
+          <li><strong>Relational structure:</strong> the system depends on relationships between users, submissions, artifacts, subjects, and LMS sync records.</li>
+          <li><strong>Strong consistency:</strong> exam records must not point to the wrong student or disappear midway through a Moodle submission.</li>
+          <li><strong>ACID compliance:</strong> upload and mapping operations can be wrapped in transactions so partial writes do not corrupt the workflow.</li>
+          <li><strong>Indexing and query planning:</strong> dashboard and retry queries can be optimized around student ID, subject ID, status, and timestamps.</li>
+          <li><strong>Auditability:</strong> append-style log tables make the project easier to debug and explain in interviews.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Not Alternatives</h2>
+        <div class="comparison">
+          <div>
+            <h3>MongoDB</h3>
+            <p>MongoDB document storage is flexible, but ExamFlow Nexus needs relational joins across users, submissions, artifacts, subjects, queue state, and audit logs. Embedding everything would duplicate data and make gradebook reconciliation harder.</p>
+          </div>
+          <div>
+            <h3>MySQL</h3>
+            <p>MySQL could support basic relational storage, but PostgreSQL offers stronger flexibility for future metadata columns, JSON fields, advanced indexing, reporting queries, and constraint-heavy modeling.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Project Implementation</h2>
+        <ul>
+          <li><strong>Foreign keys:</strong> submissions reference users/students, artifacts, and subjects so invalid mappings are rejected by the database.</li>
+          <li><strong>Indexes:</strong> lookup-heavy fields such as username, register number, submission status, student ID, and subject ID should be indexed.</li>
+          <li><strong>Queries:</strong> dashboard queries join the tables needed to show only a student's own mapped answer sheets.</li>
+          <li><strong>Status updates:</strong> queue and Moodle sync flows update deterministic state fields instead of relying on file presence.</li>
+          <li><strong>Logs:</strong> processing logs and audit logs make retry failures explainable.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: Table Schema</h2>
+        <pre class="snippet"><code>CREATE TABLE submissions (
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER NOT NULL REFERENCES users(id),
+  artifact_id INTEGER NOT NULL REFERENCES artifacts(id),
+  subject_id INTEGER NOT NULL REFERENCES subjects(id),
+  status VARCHAR(32) NOT NULL DEFAULT 'uploaded',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_submissions_student_status
+ON submissions (student_id, status);</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: Join Query</h2>
+        <pre class="snippet"><code>SELECT s.id, s.status, a.file_path, sub.code, sub.name
+FROM submissions s
+JOIN artifacts a ON a.id = s.artifact_id
+JOIN subjects sub ON sub.id = s.subject_id
+JOIN users u ON u.id = s.student_id
+WHERE u.username = :student_username
+ORDER BY s.created_at DESC;</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Performance</h2>
+        <ul>
+          <li><strong>Indexing:</strong> composite indexes on <code>student_id + status</code> and <code>subject_id + status</code> speed dashboard and staff review queries.</li>
+          <li><strong>Query optimization:</strong> dashboard queries should select only required columns instead of loading large artifact metadata blobs.</li>
+          <li><strong>Connection pooling:</strong> FastAPI should use controlled DB sessions to avoid exhausting database connections during concurrent uploads.</li>
+          <li><strong>Queue queries:</strong> retry workers can efficiently scan rows with statuses like <code>queued</code>, <code>failed</code>, or <code>retrying</code>.</li>
+          <li><strong>File separation:</strong> PostgreSQL should store file paths or object keys, while binary scanned papers remain in file/object storage.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Security</h2>
+        <ul>
+          <li><strong>Role access:</strong> staff queries can see upload and processing state, while student queries must be filtered by authenticated student identity.</li>
+          <li><strong>Data integrity:</strong> foreign keys prevent submissions from referencing missing users, subjects, or artifacts.</li>
+          <li><strong>Constraint safety:</strong> non-null status fields and controlled status values reduce invalid workflow states.</li>
+          <li><strong>Secret handling:</strong> database credentials should live in environment variables, not frontend code or committed files.</li>
+          <li><strong>Audit trail:</strong> processing logs and Moodle sync logs help detect unexpected submission changes.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Limitations</h2>
+        <ul>
+          <li><strong>Scaling complexity:</strong> high-volume exam windows may require connection pooling, query tuning, larger database resources, or read replicas.</li>
+          <li><strong>Migration discipline:</strong> relational schema changes need migrations and careful deployment planning.</li>
+          <li><strong>Large file handling:</strong> PostgreSQL is not the right place to store large scanned paper binaries.</li>
+          <li><strong>Index tradeoffs:</strong> indexes improve reads but can slow high-volume writes if added without clear query patterns.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Final Justification</h2>
+        <p>PostgreSQL is the right database for ExamFlow Nexus because the project is built around reliable relationships: students, uploads, artifacts, subjects, queue state, Moodle syncs, and audit logs. Strong consistency and relational joins make the scanned-paper-to-LMS pipeline trustworthy and explainable.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>PostgreSQL technical documentation page.</p></div>
+    <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="jwt.html">JWT</a><a href="render.html">Render</a></div>
+  </footer>
+  <div class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Render - ExamFlow Nexus</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <div class="nav-menu">
+        <a href="index.html#tech">Tech Stack</a>
+        <a href="index.html#demo">Live Demo</a>
+        <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/staff" target="_blank" rel="noopener noreferrer">Launch Project</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="tech-page-main">
+    <section class="tech-page-hero reveal">
+      <a class="back-link" href="index.html#tech">Back to Tech Stack</a>
+      <p class="eyebrow">Deployment Layer</p>
+      <h1 class="gradient-title">Render Deployment</h1>
+      <p>Cloud hosting layer that serves the FastAPI backend, frontend portal pages, and public demo URLs for ExamFlow Nexus.</p>
+    </section>
+
+    <section class="tech-page-grid">
+      <article class="tech-panel reveal">
+        <h2>Role In ExamFlow Nexus</h2>
+        <ul>
+          <li>Render hosts both the FastAPI backend and the frontend pages served by the application.</li>
+          <li>It turns the project from a local development app into a public interview-ready demo.</li>
+          <li>It provides a stable public URL for staff portal, student portal, and LMS demo routes.</li>
+          <li>It manages build execution, runtime process startup, environment variables, and service logs.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Deployment Architecture</h2>
+        <pre class="snippet"><code>[ GitHub ] -&gt; [ Render ] -&gt; [ FastAPI App ] -&gt; [ Public URL ]</code></pre>
+        <div class="mini-diagram">
+          <span class="mini-node">GitHub</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Render</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">FastAPI App</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Public URL</span>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Deployment Workflow</h2>
+        <pre class="snippet"><code>[ Push ] -&gt; [ Build ] -&gt; [ Deploy ] -&gt; [ Serve ]</code></pre>
+        <ul>
+          <li><strong>Push:</strong> project changes are pushed to the connected GitHub repository.</li>
+          <li><strong>Build:</strong> Render installs Python dependencies and prepares the service runtime.</li>
+          <li><strong>Deploy:</strong> Render starts the FastAPI application with the configured start command.</li>
+          <li><strong>Serve:</strong> staff, student, LMS, and portfolio routes are available through the public URL.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Render</h2>
+        <ul>
+          <li><strong>Easy deployment:</strong> Render reduces infrastructure work for a Python web app by handling builds, process startup, HTTPS, and service logs.</li>
+          <li><strong>Free tier:</strong> the project can be demonstrated publicly without immediate hosting cost.</li>
+          <li><strong>GitHub integration:</strong> deployment can follow repository pushes instead of manual file uploads.</li>
+          <li><strong>Environment config:</strong> secrets such as JWT keys, database URLs, and Moodle settings can live outside the codebase.</li>
+          <li><strong>Portfolio readiness:</strong> interviewers can open the project through a URL instead of running setup locally.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Not Alternatives</h2>
+        <div class="comparison">
+          <div>
+            <h3>AWS</h3>
+            <p>AWS is powerful, but it adds infrastructure complexity: IAM, load balancers, EC2/ECS/App Runner choices, networking, logging, and cost controls. That is unnecessary for this portfolio-scale middleware deployment.</p>
+          </div>
+          <div>
+            <h3>Heroku</h3>
+            <p>Heroku has a simple developer experience, but its free-tier availability has become more limited. Render is a better fit for an accessible public demo with straightforward web-service setup.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Project Implementation</h2>
+        <ul>
+          <li><strong>Service setup:</strong> configure a Render web service connected to the project repository.</li>
+          <li><strong>Build command:</strong> install Python dependencies from the requirements file.</li>
+          <li><strong>Start command:</strong> run the FastAPI app with the host bound to <code>0.0.0.0</code> and the port supplied by Render.</li>
+          <li><strong>Environment config:</strong> store JWT secret, database URL, Moodle token, and deployment flags as Render environment variables.</li>
+          <li><strong>Static/frontend delivery:</strong> frontend templates and static assets are served by the deployed FastAPI application.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Runtime Command</h2>
+        <pre class="snippet"><code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Environment Configuration</h2>
+        <pre class="snippet"><code>DATABASE_URL=postgresql://...
+JWT_SECRET=render-managed-secret
+MOODLE_TOKEN=server-side-token
+RELOAD=false
+PYTHONUNBUFFERED=1</code></pre>
+        <ul>
+          <li>Environment variables keep deployment-specific secrets out of GitHub.</li>
+          <li>Production flags should disable debug reload behavior and avoid verbose secret-bearing logs.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Request Flow</h2>
+        <pre class="snippet"><code>[ Browser ] -&gt; [ Render Public URL ] -&gt; [ FastAPI Runtime ] -&gt; [ PostgreSQL / File Storage / Moodle ] -&gt; [ Response ]</code></pre>
+        <ul>
+          <li>Render is the hosting boundary; business logic remains inside FastAPI services.</li>
+          <li>Logs from this boundary help diagnose deployment, startup, upload, and integration errors.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Performance</h2>
+        <ul>
+          <li><strong>Cold start:</strong> free-tier services may take time to wake up after inactivity, so the first request can be slower than later requests.</li>
+          <li><strong>Uptime:</strong> paid instances or always-on configurations are more appropriate for real exam windows where downtime is unacceptable.</li>
+          <li><strong>Resource limits:</strong> CPU and memory limits affect file processing and concurrent upload workloads.</li>
+          <li><strong>External latency:</strong> database and Moodle calls still dominate response time if those services are slow.</li>
+          <li><strong>Scaling path:</strong> upgrade instance size, add managed PostgreSQL, and move files to durable object storage as usage grows.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Security Considerations</h2>
+        <ul>
+          <li>Store JWT secrets, database URLs, and Moodle tokens in Render environment variables.</li>
+          <li>Use HTTPS public URLs for login, upload, dashboard, and LMS submission flows.</li>
+          <li>Review logs to ensure credentials, tokens, and full request payloads are not printed.</li>
+          <li>Use least-privilege database credentials for the deployed service.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Limitations</h2>
+        <ul>
+          <li><strong>Sleeping service:</strong> free services can sleep when inactive, causing slower first response times.</li>
+          <li><strong>Limited resources:</strong> free or small instances may struggle with many simultaneous uploads or heavy file processing.</li>
+          <li><strong>Ephemeral storage:</strong> local disk should not be treated as permanent storage for scanned answer sheets in production.</li>
+          <li><strong>Platform dependency:</strong> deployment behavior depends on Render build/runtime rules, logs, and service availability.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Final Justification</h2>
+        <p>Render is the right deployment choice for ExamFlow Nexus because it gives the project a public, low-friction hosting path for both backend and frontend experiences. It is simple enough for a portfolio deployment while still supporting environment configuration, service logs, and an upgrade path for more reliable production hosting.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>Render deployment technical documentation page.</p></div>
+    <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="frontend.html">Frontend</a><a href="moodle.html">Moodle</a></div>
+  </footer>
+  <div class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

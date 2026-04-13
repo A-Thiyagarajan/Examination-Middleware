@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend - ExamFlow Nexus</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <div class="nav-menu">
+        <a href="index.html#tech">Tech Stack</a>
+        <a href="index.html#screenshots">Screenshots</a>
+        <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/student" target="_blank" rel="noopener noreferrer">Launch Project</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="tech-page-main">
+    <section class="tech-page-hero reveal">
+      <a class="back-link" href="index.html#tech">Back to Tech Stack</a>
+      <p class="eyebrow">UI + Integration Layer</p>
+      <h1 class="gradient-title">Frontend (HTML/CSS/JS)</h1>
+      <p>Lightweight interface layer for staff uploads, student dashboard interactions, live demo navigation, and backend API communication.</p>
+    </section>
+
+    <section class="tech-page-grid">
+      <article class="tech-panel reveal">
+        <h2>Role In ExamFlow Nexus</h2>
+        <ul>
+          <li>The frontend is the UI layer used by staff and students to interact with the examination middleware.</li>
+          <li>Staff use it to open the upload portal and submit scanned answer-sheet files.</li>
+          <li>Students use it to log in, verify identity, view mapped submissions, and trigger LMS submission workflows.</li>
+          <li>The portfolio pages also use the same frontend stack to explain architecture, credentials, live demos, and tech documentation.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Architecture</h2>
+        <pre class="snippet"><code>[ UI ] -&gt; [ API Calls ] -&gt; [ Backend ] -&gt; [ Response ] -&gt; [ Render ]</code></pre>
+        <div class="mini-diagram">
+          <span class="mini-node">UI</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">API Calls</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Backend</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Response</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Render</span>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>UI Workflow</h2>
+        <pre class="snippet"><code>[ User Action ] -&gt; [ Fetch ] -&gt; [ Display ] -&gt; [ Submit ] -&gt; [ Update UI ]</code></pre>
+        <ul>
+          <li><strong>User Action:</strong> staff selects a file or student opens dashboard/submission controls.</li>
+          <li><strong>Fetch:</strong> JavaScript sends a request to a FastAPI endpoint.</li>
+          <li><strong>Display:</strong> the UI renders upload status, dashboard records, errors, or copy feedback.</li>
+          <li><strong>Submit:</strong> user confirms an action such as upload or Moodle submission.</li>
+          <li><strong>Update UI:</strong> DOM state changes to show success, failure, pending, or retry information.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why This Stack</h2>
+        <ul>
+          <li><strong>Lightweight:</strong> HTML/CSS/JS avoids a large frontend bundle for a project whose UI is focused and workflow-driven.</li>
+          <li><strong>Simple deployment:</strong> static assets can be served with the FastAPI app or opened directly for the portfolio site.</li>
+          <li><strong>Fast iteration:</strong> form events, fetch requests, copy buttons, and responsive diagrams are straightforward without a build pipeline.</li>
+          <li><strong>Clear integration:</strong> the frontend remains a thin client while backend validation, authentication, and data integrity stay server-side.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Not React / Angular</h2>
+        <div class="comparison">
+          <div>
+            <h3>React</h3>
+            <p>React would be useful for a large real-time dashboard, but for this project it adds build tooling, component state, and bundle complexity without enough UI complexity to justify it.</p>
+          </div>
+          <div>
+            <h3>Angular</h3>
+            <p>Angular is excellent for enterprise-scale frontends, but it is too heavy for a staff upload page, student dashboard, copy actions, and portfolio documentation pages.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Project Implementation</h2>
+        <ul>
+          <li><strong>Fetch API:</strong> sends login, dashboard, upload, and submit requests to FastAPI endpoints.</li>
+          <li><strong>DOM rendering:</strong> updates status labels, submission lists, credential copy feedback, and error messages without a framework.</li>
+          <li><strong>Responsive CSS:</strong> grid and flex layouts keep architecture diagrams, cards, and forms readable on mobile.</li>
+          <li><strong>Progressive behavior:</strong> copy buttons, menu toggles, and scroll animations enhance the page without blocking core content.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: Fetch Example</h2>
+        <pre class="snippet"><code>async function loadStudentDashboard(token) {
+  const response = await fetch("/student/dashboard", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Dashboard load failed");
+  return response.json();
+}</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: Event Handler</h2>
+        <pre class="snippet"><code>uploadForm.addEventListener("submit", async (event) =&gt; {
+  event.preventDefault();
+  const formData = new FormData(uploadForm);
+  const result = await fetch("/upload", { method: "POST", body: formData });
+  statusLabel.textContent = result.ok ? "Upload queued" : "Upload failed";
+});</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Integration Data Flow</h2>
+        <pre class="snippet"><code>[ Staff / Student UI ] -&gt; [ fetch() ] -&gt; [ FastAPI Route ] -&gt; [ JSON Response ] -&gt; [ DOM Update ]</code></pre>
+        <ul>
+          <li>The frontend does not decide whether a student can access a paper; it only displays the backend response after JWT and database checks pass.</li>
+          <li>This keeps UI code simple and prevents security rules from living only in the browser.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Performance</h2>
+        <ul>
+          <li><strong>Minimal load:</strong> no framework runtime means fewer bytes and faster first render.</li>
+          <li><strong>Fast rendering:</strong> direct DOM updates are enough for small lists, status badges, and form feedback.</li>
+          <li><strong>Static caching:</strong> CSS, JS, images, and documentation pages can be cached by the browser.</li>
+          <li><strong>Low JavaScript cost:</strong> interactions are event-driven rather than constantly polling or re-rendering large component trees.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Security Considerations</h2>
+        <ul>
+          <li>Never store production secrets or Moodle tokens in frontend JavaScript.</li>
+          <li>Use backend JWT validation as the real access boundary.</li>
+          <li>Sanitize or safely render backend-provided values to avoid injecting unsafe markup into the DOM.</li>
+          <li>Display user-friendly errors without exposing stack traces, database details, or internal file paths.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Limitations</h2>
+        <ul>
+          <li><strong>Scalability for large UI:</strong> if the student dashboard grows into a complex real-time application, vanilla DOM management can become harder to maintain.</li>
+          <li><strong>Repeated markup:</strong> multiple static documentation pages duplicate layout unless a templating system is added.</li>
+          <li><strong>Manual state management:</strong> larger form workflows may eventually benefit from a component framework or state library.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Final Justification</h2>
+        <p>HTML, CSS, and vanilla JavaScript are the right frontend choice for ExamFlow Nexus because the UI is focused on clear staff/student workflows, simple API integration, responsive documentation, and fast deployment. The backend carries the complex validation and security, while the frontend stays lightweight and easy to demonstrate.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>Frontend technical documentation page.</p></div>
+    <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="postgresql.html">PostgreSQL</a><a href="render.html">Render</a></div>
+  </footer>
+  <div class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

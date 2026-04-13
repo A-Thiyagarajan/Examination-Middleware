@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moodle LMS - ExamFlow Nexus</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <div class="nav-menu">
+        <a href="index.html#tech">Tech Stack</a>
+        <a href="index.html#demo">Live Demo</a>
+        <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/lms" target="_blank" rel="noopener noreferrer">Launch Project</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="tech-page-main">
+    <section class="tech-page-hero reveal">
+      <a class="back-link" href="index.html#tech">Back to Tech Stack</a>
+      <p class="eyebrow">External LMS Integration</p>
+      <h1 class="gradient-title">Moodle LMS Integration</h1>
+      <p>External academic system where verified scanned-paper submissions are handed off for assignment tracking and gradebook workflows.</p>
+    </section>
+
+    <section class="tech-page-grid">
+      <article class="tech-panel reveal">
+        <h2>Role In ExamFlow Nexus</h2>
+        <ul>
+          <li>Moodle acts as the external system for final submission and grading.</li>
+          <li>ExamFlow Nexus does not replace the LMS; it bridges scanned exam artifacts into LMS-compatible submission workflows.</li>
+          <li>FastAPI prepares validated records, maps them to assignment context, and sends them to the Moodle integration layer.</li>
+          <li>Moodle becomes the academic destination where faculty can review or grade records using familiar LMS concepts.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Architecture</h2>
+        <pre class="snippet"><code>[ FastAPI ] -&gt; [ Moodle API ] -&gt; [ Assignment Module ] -&gt; [ Gradebook ]</code></pre>
+        <div class="mini-diagram">
+          <span class="mini-node">FastAPI</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Moodle API</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Assignment Module</span><span class="mini-arrow">-&gt;</span>
+          <span class="mini-node">Gradebook</span>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Integration Workflow</h2>
+        <pre class="snippet"><code>[ Fetch Assignment ] -&gt; [ Map ] -&gt; [ Upload ] -&gt; [ Submit ] -&gt; [ Grade ]</code></pre>
+        <ul>
+          <li><strong>Fetch Assignment:</strong> middleware identifies the course/subject assignment target for the scanned paper.</li>
+          <li><strong>Map:</strong> student register number, subject code, artifact path, and Moodle assignment ID are linked.</li>
+          <li><strong>Upload:</strong> file reference or artifact payload is prepared for Moodle-compatible submission.</li>
+          <li><strong>Submit:</strong> Moodle API client sends the request with LMS token authentication.</li>
+          <li><strong>Grade:</strong> Moodle assignment/gradebook state becomes the downstream academic record.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Moodle</h2>
+        <ul>
+          <li><strong>Standard LMS:</strong> Moodle is widely used in academic environments and matches the project context of exams, students, faculty, assignments, and grades.</li>
+          <li><strong>API support:</strong> Moodle can expose web-service style integration points for assignment and gradebook workflows.</li>
+          <li><strong>Academic use:</strong> using Moodle makes the portfolio feel like a real institutional integration rather than a standalone demo.</li>
+          <li><strong>Clear boundary:</strong> ExamFlow Nexus remains a middleware system while Moodle remains the official learning platform.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Not Alternatives</h2>
+        <div class="comparison">
+          <div>
+            <h3>Custom LMS</h3>
+            <p>A custom LMS would dramatically increase scope: courses, enrollments, faculty dashboards, gradebook rules, and permissions. ExamFlow Nexus only needs to bridge scanned submissions into an LMS, not build the LMS itself.</p>
+          </div>
+          <div>
+            <h3>Google Classroom</h3>
+            <p>Google Classroom is useful for classroom workflows, but it offers less control for custom backend-driven submission mapping, self-hosted academic integration, and LMS-gradebook simulation in this project.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Project Implementation</h2>
+        <ul>
+          <li><strong>API calls:</strong> FastAPI delegates Moodle communication to a Moodle client/service instead of embedding HTTP logic in route handlers.</li>
+          <li><strong>Token auth:</strong> Moodle API tokens should be read from environment variables and never exposed to the frontend.</li>
+          <li><strong>Assignment mapping:</strong> subject codes or course identifiers from the scanned-paper metadata are mapped to Moodle assignment IDs.</li>
+          <li><strong>Submission state:</strong> database records track whether the Moodle call is pending, submitted, failed, or retrying.</li>
+          <li><strong>Response handling:</strong> Moodle response IDs or errors are stored for audit logs and staff troubleshooting.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: HTTP Request To Moodle</h2>
+        <pre class="snippet"><code>async def submit_to_moodle(submission):
+    payload = {
+        "assignment_id": submission.moodle_assignment_id,
+        "student_id": submission.student.username,
+        "file_url": submission.artifact_url,
+    }
+    headers = {"Authorization": f"Bearer {MOODLE_TOKEN}"}
+    response = await httpx.post(MOODLE_SUBMIT_URL, json=payload, headers=headers)
+    response.raise_for_status()
+    return response.json()</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Data Flow</h2>
+        <pre class="snippet"><code>[ Verified Submission ] -&gt; [ Assignment Mapping ] -&gt; [ Moodle Token Auth ] -&gt; [ API Upload ] -&gt; [ LMS Response ] -&gt; [ Sync Log ]</code></pre>
+        <ul>
+          <li>The middleware remains responsible for mapping and retry state; Moodle is responsible for the final LMS assignment and gradebook layer.</li>
+          <li>This separation makes failures easier to diagnose because the sync log can show whether mapping, upload, or Moodle response handling failed.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Performance</h2>
+        <ul>
+          <li><strong>API latency handling:</strong> Moodle calls should use timeouts so a slow LMS does not block FastAPI workers indefinitely.</li>
+          <li><strong>Retry logic:</strong> transient failures should move the submission to a retrying state rather than forcing staff or students to repeat the entire workflow.</li>
+          <li><strong>Queue handoff:</strong> high-volume exam sessions should enqueue Moodle submissions and process them in the background.</li>
+          <li><strong>Batch strategy:</strong> future versions can batch multiple submissions by subject or assignment when LMS rate limits require it.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Security</h2>
+        <ul>
+          <li>Moodle API tokens must be stored server-side in environment variables.</li>
+          <li>Students must not be allowed to choose arbitrary Moodle assignment IDs from the frontend.</li>
+          <li>Assignment mapping should be validated against database subject/course records.</li>
+          <li>Logs should store response status and correlation IDs, not raw LMS tokens or sensitive payloads.</li>
+          <li>Submission ownership must be checked before any Moodle upload is attempted.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Limitations</h2>
+        <ul>
+          <li><strong>External dependency:</strong> Moodle availability, API configuration, token validity, and assignment setup directly affect submission success.</li>
+          <li><strong>Configuration complexity:</strong> real Moodle instances require correct roles, web services, permissions, course IDs, and assignment mappings.</li>
+          <li><strong>Latency variance:</strong> Moodle response time may be slower than internal database operations, so the integration must be timeout and retry aware.</li>
+          <li><strong>API coupling:</strong> Moodle API changes or permission changes can break the integration if not isolated in a client layer.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Final Justification</h2>
+        <p>Moodle is the right integration target because ExamFlow Nexus is an examination middleware system, not a replacement LMS. Moodle provides the academic submission and grading context, while FastAPI and PostgreSQL handle validation, mapping, retry state, and auditability before data reaches the LMS.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>Moodle LMS integration technical documentation page.</p></div>
+    <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="jwt.html">JWT</a><a href="render.html">Render</a></div>
+  </footer>
+  <div class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

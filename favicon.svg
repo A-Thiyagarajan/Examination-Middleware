@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ExamFlow Nexus icon">
+  <defs>
+    <linearGradient id="examflow-gradient" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="0.52" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#020617"/>
+  <rect x="7" y="7" width="50" height="50" rx="13" fill="url(#examflow-gradient)"/>
+  <path d="M22 19h21v6H29v5h12v6H29v9h-7V19Z" fill="#020617"/>
+  <path d="M42 38h-9v-6h17v6l-9 8h9v6H33v-6l9-8Z" fill="#020617"/>
+</svg>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Auth - ExamFlow Nexus</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <div class="nav-menu">
+        <a href="index.html#tech">Tech Stack</a>
+        <a href="index.html#credentials">Credentials</a>
+        <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/student" target="_blank" rel="noopener noreferrer">Launch Project</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="tech-page-main">
+    <section class="tech-page-hero reveal">
+      <a class="back-link" href="index.html#tech">Back to Tech Stack</a>
+      <p class="eyebrow">Authentication Layer</p>
+      <h1 class="gradient-title">JWT Authentication</h1>
+      <p>Stateless security layer protecting staff upload, student dashboard, and submission APIs in ExamFlow Nexus.</p>
+    </section>
+
+    <section class="tech-page-grid">
+      <article class="tech-panel reveal">
+        <h2>Role In ExamFlow Nexus</h2>
+        <ul>
+          <li>JWT authentication acts as the API access gate between browser portals and protected FastAPI routes.</li>
+          <li>It identifies whether the caller is staff, student, or another allowed actor before upload, dashboard, or submission logic runs.</li>
+          <li>It protects sensitive exam records such as scanned answer-sheet mappings, register numbers, and LMS submission state.</li>
+          <li>It keeps the backend stateless so multiple API instances can validate requests without shared session storage.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Architecture</h2>
+        <div class="jwt-architecture" aria-label="JWT security architecture diagram">
+          <div class="jwt-box jwt-login">User Login</div>
+          <div class="jwt-arrow jwt-auth-arrow">-&gt;</div>
+          <div class="jwt-box jwt-auth-service">Auth Service</div>
+          <div class="jwt-arrow jwt-generation-arrow">-&gt;</div>
+          <div class="jwt-box jwt-generation">Token Generation</div>
+
+          <div class="jwt-arrow jwt-token-drop">↓</div>
+          <div class="jwt-box jwt-token">JWT Token</div>
+
+          <div class="jwt-arrow jwt-storage-drop">↓</div>
+          <div class="jwt-box jwt-storage">Client Storage</div>
+          <div class="jwt-arrow jwt-request-arrow">-&gt;</div>
+          <div class="jwt-box jwt-request">API Request</div>
+          <div class="jwt-arrow jwt-validation-arrow">-&gt;</div>
+          <div class="jwt-box jwt-validation">Token Validation</div>
+
+          <div class="jwt-arrow jwt-access-drop">↓</div>
+          <div class="jwt-box jwt-access">Access Control</div>
+          <div class="jwt-arrow jwt-routes-drop">↓</div>
+          <div class="jwt-box jwt-routes">Protected Routes</div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Authentication Workflow</h2>
+        <pre class="snippet"><code>[ Login ] -&gt; [ Generate JWT ] -&gt; [ Attach ] -&gt; [ Verify ] -&gt; [ Authorize ]</code></pre>
+        <ul>
+          <li><strong>Login:</strong> staff or student submits credentials through the portal.</li>
+          <li><strong>Generate JWT:</strong> backend signs a token containing subject, role, and expiration claims.</li>
+          <li><strong>Attach:</strong> client sends the token with protected API requests.</li>
+          <li><strong>Verify:</strong> FastAPI dependency decodes token, checks signature, algorithm, and expiration.</li>
+          <li><strong>Authorize:</strong> role checks decide whether the request can access staff upload, student dashboard, or submit actions.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why JWT</h2>
+        <ul>
+          <li><strong>Stateless:</strong> the backend does not need server-side session storage for every logged-in user.</li>
+          <li><strong>Scalable:</strong> any FastAPI instance with the signing secret can validate the token, which supports horizontal scaling.</li>
+          <li><strong>Secure claims:</strong> signed payloads prevent clients from changing role or subject values without invalidating the signature.</li>
+          <li><strong>API-friendly:</strong> staff, student, and submission routes can all use the same Authorization-header pattern.</li>
+          <li><strong>Short-lived access:</strong> expiration reduces the impact of a leaked token.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Not Alternatives</h2>
+        <div class="comparison">
+          <div>
+            <h3>Session Auth</h3>
+            <p>Session authentication is reliable for classic server-rendered apps, but it is stateful. ExamFlow Nexus would need shared session storage or sticky routing when multiple API instances serve upload and dashboard requests.</p>
+          </div>
+          <div>
+            <h3>Cookies Only</h3>
+            <p>Cookies alone are less explicit for API-style authorization. They also require careful CSRF handling and can blur the separation between staff/student APIs and browser session behavior.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Project Implementation</h2>
+        <ul>
+          <li><strong>Token creation:</strong> login endpoints issue signed JWTs after credential verification.</li>
+          <li><strong>Dependency injection:</strong> FastAPI dependencies decode tokens and expose validated identity to route handlers.</li>
+          <li><strong>Middleware:</strong> request middleware can apply headers, request logging, CORS rules, and centralized error boundaries before protected routes execute.</li>
+          <li><strong>Role checks:</strong> staff token is required for <code>/upload</code>, while student token is required for <code>/student/dashboard</code> and <code>/submit</code>.</li>
+          <li><strong>Ownership checks:</strong> student token subject is matched against database records so a student cannot fetch another student's artifact.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: JWT Encode</h2>
+        <pre class="snippet"><code>def create_access_token(user_id: str, role: str) -&gt; str:
+    payload = {
+        "sub": user_id,
+        "role": role,
+        "exp": datetime.utcnow() + timedelta(minutes=30),
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: JWT Decode</h2>
+        <pre class="snippet"><code>def decode_access_token(token: str) -&gt; dict:
+    try:
+        return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: FastAPI Dependency</h2>
+        <pre class="snippet"><code>def require_student(payload: dict = Depends(validate_jwt)):
+    if payload.get("role") != "student":
+        raise HTTPException(status_code=403, detail="Student access required")
+    return payload</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Security Analysis</h2>
+        <ul>
+          <li><strong>Expiration:</strong> tokens should expire quickly, especially for public demo portals or shared machines.</li>
+          <li><strong>Encryption vs signing:</strong> standard JWTs are signed, not encrypted. Do not place passwords, register numbers, or sensitive artifact paths inside the payload.</li>
+          <li><strong>Validation:</strong> always validate signature, algorithm, expiration, subject, and role before route logic runs.</li>
+          <li><strong>Transport security:</strong> send tokens only over HTTPS so bearer tokens are not exposed in transit.</li>
+          <li><strong>Secret storage:</strong> keep <code>SECRET_KEY</code> in deployment environment variables, not source code.</li>
+          <li><strong>Authorization boundary:</strong> JWT proves identity and role, but database checks still enforce artifact ownership.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Performance &amp; Scalability</h2>
+        <ul>
+          <li>JWT validation is local and fast because it does not require a database or session-store lookup for every request.</li>
+          <li>Stateless verification supports multiple FastAPI workers or future horizontal scaling.</li>
+          <li>Role claims reduce repeated user-role queries, while ownership checks still query PostgreSQL when sensitive records are requested.</li>
+          <li>Short tokens keep request headers small and reduce parsing overhead.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Limitations</h2>
+        <ul>
+          <li><strong>Token revocation complexity:</strong> once issued, a token remains valid until expiration unless a denylist or token version strategy is added.</li>
+          <li><strong>Client storage risk:</strong> poorly stored tokens can be stolen by XSS or browser compromise.</li>
+          <li><strong>Payload visibility:</strong> JWT payloads are base64url encoded and readable, so they must not contain secrets.</li>
+          <li><strong>Key rotation:</strong> changing signing keys requires a planned rollover strategy so valid users are not abruptly logged out.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Final Justification</h2>
+        <p>JWT is the right authentication layer for ExamFlow Nexus because the system needs secure, stateless API access across staff upload, student dashboard, and LMS submission flows. It scales cleanly, integrates naturally with FastAPI dependencies, and keeps authorization close to the routes that protect exam data.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>JWT authentication technical documentation page.</p></div>
+    <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="postgresql.html">PostgreSQL</a><a href="moodle.html">Moodle</a></div>
+  </footer>
+  <div class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

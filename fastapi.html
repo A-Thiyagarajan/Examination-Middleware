@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FastAPI - ExamFlow Nexus</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <div class="nav-menu">
+        <a href="index.html#tech">Tech Stack</a>
+        <a href="index.html#architecture">Architecture</a>
+        <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/staff" target="_blank" rel="noopener noreferrer">Launch Project</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="tech-page-main">
+    <section class="tech-page-hero reveal">
+      <a class="back-link" href="index.html#tech">Back to Tech Stack</a>
+      <p class="eyebrow">Core Backend Engine</p>
+      <h1 class="gradient-title">FastAPI</h1>
+      <p>Async API engine powering exam-paper upload, validation, student dashboard access, queue-ready processing, and Moodle LMS submission.</p>
+    </section>
+
+    <section class="tech-page-grid">
+      <article class="tech-panel reveal">
+        <h2>Role In System</h2>
+        <ul>
+          <li>FastAPI acts as the core backend engine for ExamFlow Nexus.</li>
+          <li>It sits between the staff/student portals and the backend services that process files, update the database, and submit data to Moodle LMS.</li>
+          <li>It handles API routing for upload, dashboard, and submission endpoints.</li>
+          <li>It validates request data before it reaches file processing or LMS integration logic.</li>
+          <li>It coordinates JWT-protected access so staff-only and student-only workflows remain separated.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Architecture Diagram</h2>
+        <div class="backend-architecture" aria-label="FastAPI backend architecture diagram">
+          <div class="backend-layer-label user-label">User Layer</div>
+          <div class="backend-layer-label api-label">API Layer</div>
+          <div class="backend-layer-label processing-label">Processing Layer</div>
+          <div class="backend-layer-label storage-label">Storage Layer</div>
+          <div class="backend-layer-label external-label">External System</div>
+
+          <div class="backend-box client-box">Client</div>
+          <div class="backend-arrow router-arrow">-&gt;</div>
+          <div class="backend-box router-box">API Router</div>
+          <div class="backend-arrow middleware-arrow">-&gt;</div>
+          <div class="backend-box middleware-box">Middleware</div>
+          <div class="backend-arrow jwt-arrow">-&gt;</div>
+          <div class="backend-box jwt-box">JWT Auth</div>
+
+          <div class="backend-arrow validation-drop">↓</div>
+          <div class="backend-box validation-box">Validation Layer</div>
+          <div class="backend-arrow service-drop">↓</div>
+          <div class="backend-box service-box">Service Layer</div>
+          <div class="backend-arrow processing-drop">↓</div>
+
+          <div class="backend-box file-box">File Processing</div>
+          <div class="backend-arrow db-arrow">-&gt;</div>
+          <div class="backend-box db-box">PostgreSQL</div>
+          <div class="backend-arrow queue-arrow">-&gt;</div>
+          <div class="backend-box queue-box">Queue System</div>
+
+          <div class="backend-arrow moodle-drop">↓</div>
+          <div class="backend-box moodle-client-box">Moodle API Client</div>
+          <div class="backend-arrow response-drop">↓</div>
+          <div class="backend-box response-box">Response</div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Tech Workflow</h2>
+        <pre class="snippet"><code>[ Staff Upload ] -&gt; [ Request ] -&gt; [ Validation ] -&gt; [ Auth ] -&gt; [ File Processing ] -&gt; [ DB ] -&gt; [ Queue ] -&gt; [ Moodle ] -&gt; [ Response ]</code></pre>
+        <ul>
+          <li><strong>Staff Upload:</strong> staff sends a scanned answer sheet through the upload portal.</li>
+          <li><strong>Request:</strong> FastAPI receives the multipart request at the upload route.</li>
+          <li><strong>Validation:</strong> file metadata, expected fields, and route parameters are checked.</li>
+          <li><strong>Auth:</strong> JWT dependency confirms the user is allowed to upload or submit.</li>
+          <li><strong>File Processing:</strong> service layer parses filename metadata and stores the artifact.</li>
+          <li><strong>DB:</strong> submission state is inserted or updated for dashboard visibility.</li>
+          <li><strong>Queue:</strong> retry-ready submission state is prepared for Moodle handoff.</li>
+          <li><strong>Moodle:</strong> LMS client submits verified data.</li>
+          <li><strong>Response:</strong> FastAPI returns a clean status payload to the portal.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why FastAPI</h2>
+        <ul>
+          <li><strong>Async performance:</strong> the system performs I/O-heavy work such as uploads, database access, and Moodle HTTP calls. FastAPI supports async handlers so slow external operations do not block unrelated requests.</li>
+          <li><strong>Pydantic validation:</strong> request models and typed dependencies reduce invalid student IDs, malformed payloads, and unsafe submission states before service logic runs.</li>
+          <li><strong>API-first design:</strong> ExamFlow Nexus is a middleware platform, not just a rendered website. FastAPI fits route-driven integration work better than a minimal microframework.</li>
+          <li><strong>Dependency injection:</strong> authentication, database sessions, and service dependencies can be composed cleanly per endpoint.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Why Not Alternatives</h2>
+        <div class="comparison">
+          <div>
+            <h3>Flask</h3>
+            <p>Flask is lightweight, but this project would need more manual validation, more custom auth wiring, and less natural async support for Moodle API calls and upload workflows.</p>
+          </div>
+          <div>
+            <h3>Django</h3>
+            <p>Django is powerful for full-stack applications, but it is too heavy for a focused middleware service whose main responsibilities are API routing, validation, service orchestration, and LMS integration.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Project Implementation</h2>
+        <ul>
+          <li><strong>/upload:</strong> accepts scanned answer sheets from staff, validates access, and sends the file into the artifact processing pipeline.</li>
+          <li><strong>/student/dashboard:</strong> loads mapped submissions for a verified student and prevents cross-student access.</li>
+          <li><strong>/submit:</strong> moves a verified submission toward Moodle LMS through the submission service and queue/retry path.</li>
+          <li><strong>Service layer:</strong> keeps route handlers thin by moving file parsing, database writes, and Moodle calls into dedicated backend services.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: FastAPI Route</h2>
+        <pre class="snippet"><code>@router.post("/upload")
+async def upload_exam_file(
+    file: UploadFile,
+    staff=Depends(require_staff),
+    db: Session = Depends(get_db),
+):
+    artifact = await file_processor.store_and_parse(file)
+    submission = submission_service.create(db, artifact, staff.id)
+    return {"submission_id": submission.id, "status": submission.status}</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: Dependency Injection</h2>
+        <pre class="snippet"><code>def require_staff(payload: dict = Depends(validate_jwt)):
+    if payload.get("role") != "staff":
+        raise HTTPException(status_code=403, detail="Staff access required")
+    return payload</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Code Snippet: Async Submission</h2>
+        <pre class="snippet"><code>@router.post("/submit")
+async def submit_to_lms(
+    submission_id: int,
+    student=Depends(require_student),
+    db: Session = Depends(get_db),
+):
+    result = await submission_service.submit_to_moodle(db, submission_id, student["sub"])
+    return {"status": result.status, "moodle_ref": result.reference}</code></pre>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Performance</h2>
+        <ul>
+          <li><strong>Async I/O:</strong> upload handling and Moodle submission can be implemented with async functions so network-bound work does not freeze the API worker.</li>
+          <li><strong>Concurrency:</strong> multiple students can load dashboards while staff upload or Moodle submission requests are waiting on I/O.</li>
+          <li><strong>Queue-ready design:</strong> the route can respond after recording a submission state while the retry manager handles LMS delivery.</li>
+          <li><strong>Thin route handlers:</strong> pushing processing into services keeps request handling predictable and easier to profile.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Security</h2>
+        <ul>
+          <li><strong>Middleware:</strong> common request handling can enforce CORS, headers, logging, and error boundaries.</li>
+          <li><strong>JWT validation:</strong> protected routes decode and verify tokens before staff upload or student dashboard logic runs.</li>
+          <li><strong>Role authorization:</strong> staff routes reject student tokens, and student routes verify ownership before returning submission records.</li>
+          <li><strong>Input validation:</strong> request fields and uploaded files are checked before database writes or Moodle calls.</li>
+          <li><strong>Safe error handling:</strong> responses should not expose file paths, JWT secrets, Moodle tokens, or internal stack traces.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Limitations</h2>
+        <ul>
+          <li><strong>Learning curve:</strong> developers must understand async functions, dependency injection, and typed request models.</li>
+          <li><strong>Async complexity:</strong> blocking file or database operations inside async routes can reduce the benefits of concurrency.</li>
+          <li><strong>Background work:</strong> FastAPI alone is not a full job queue; heavy file processing and LMS retries should move to background workers or a queue manager as traffic grows.</li>
+          <li><strong>Operational discipline:</strong> route boundaries, service modules, and error contracts must stay clean as the middleware expands.</li>
+        </ul>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Final Justification</h2>
+        <p>FastAPI is the strongest backend fit for ExamFlow Nexus because the system is API-first, validation-heavy, I/O-bound, and integration-focused. It gives the middleware a clean way to receive staff uploads, protect student workflows with JWT, coordinate file and database services, and submit verified records to Moodle LMS without the overhead of a full-stack framework.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>FastAPI technical documentation page.</p></div>
+    <div class="footer-links"><a href="postgresql.html">PostgreSQL</a><a href="jwt.html">JWT</a><a href="moodle.html">Moodle</a></div>
+  </footer>
+  <div class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
