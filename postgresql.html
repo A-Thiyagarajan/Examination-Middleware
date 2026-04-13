@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PostgreSQL - ExamFlow Nexus</title>
+  <title>PostgreSQL - Examination Middleware</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +14,9 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
-      <div class="nav-menu">
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
+      <div class="nav-menu" id="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#architecture">Architecture</a>
         <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/staff" target="_blank" rel="noopener noreferrer">Launch Project</a>
@@ -33,7 +34,7 @@
 
     <section class="tech-page-grid">
       <article class="tech-panel reveal">
-        <h2>Role In ExamFlow Nexus</h2>
+        <h2>Role In Examination Middleware</h2>
         <ul>
           <li>PostgreSQL is the system of record behind the FastAPI middleware.</li>
           <li>It stores users, students, staff identities, scanned-paper submissions, artifact references, subject mappings, processing queue records, processing logs, Moodle sync results, and audit logs.</li>
@@ -96,7 +97,7 @@
         <div class="comparison">
           <div>
             <h3>MongoDB</h3>
-            <p>MongoDB document storage is flexible, but ExamFlow Nexus needs relational joins across users, submissions, artifacts, subjects, queue state, and audit logs. Embedding everything would duplicate data and make gradebook reconciliation harder.</p>
+            <p>MongoDB document storage is flexible, but Examination Middleware needs relational joins across users, submissions, artifacts, subjects, queue state, and audit logs. Embedding everything would duplicate data and make gradebook reconciliation harder.</p>
           </div>
           <div>
             <h3>MySQL</h3>
@@ -118,7 +119,7 @@
 
       <article class="tech-panel reveal">
         <h2>Technical SQL Showcase</h2>
-        <p>ExamFlow Nexus uses relational tables to connect authenticated users, scanned exam artifacts, and submission-state tracking. The workflow depends on those links being explicit and queryable.</p>
+        <p>Examination Middleware uses relational tables to connect authenticated users, scanned exam artifacts, and submission-state tracking. The workflow depends on those links being explicit and queryable.</p>
       </article>
 
       <article class="tech-panel reveal">
@@ -266,13 +267,13 @@ CREATE INDEX ix_queue_status_retry
 
       <article class="tech-panel reveal">
         <h2>Final Justification</h2>
-        <p>PostgreSQL is the right database for ExamFlow Nexus because the project is built around reliable relationships: students, uploads, artifacts, subjects, queue state, Moodle syncs, and audit logs. Strong consistency and relational joins make the scanned-paper-to-LMS pipeline trustworthy and explainable.</p>
+        <p>PostgreSQL is the right database for Examination Middleware because the project is built around reliable relationships: students, uploads, artifacts, subjects, queue state, Moodle syncs, and audit logs. Strong consistency and relational joins make the scanned-paper-to-LMS pipeline trustworthy and explainable.</p>
       </article>
     </section>
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>PostgreSQL technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a><p>PostgreSQL technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="jwt.html">JWT</a><a href="render.html">Render</a></div>
   </footer>
   <div class="toast"></div>

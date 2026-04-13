@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Frontend - ExamFlow Nexus</title>
+  <title>Frontend - Examination Middleware</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +14,9 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
-      <div class="nav-menu">
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
+      <div class="nav-menu" id="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#screenshots">Screenshots</a>
         <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/student" target="_blank" rel="noopener noreferrer">Launch Project</a>
@@ -33,7 +34,7 @@
 
     <section class="tech-page-grid">
       <article class="tech-panel reveal">
-        <h2>Role In ExamFlow Nexus</h2>
+        <h2>Role In Examination Middleware</h2>
         <ul>
           <li>The frontend is the UI layer used by staff and students to interact with the examination middleware.</li>
           <li>Staff use it to open the upload portal and submit scanned answer-sheet files.</li>
@@ -45,7 +46,7 @@
       <article class="tech-panel reveal">
         <h2>Frontend Architecture Diagram</h2>
         <p>Simple UI architecture diagram showing how both portal experiences trigger frontend events, communicate with FastAPI, and return JSON-driven UI updates.</p>
-        <div class="frontend-system-wrap" aria-label="ExamFlow Nexus frontend architecture diagram">
+        <div class="frontend-system-wrap" aria-label="Examination Middleware frontend architecture diagram">
           <div class="frontend-lane-label">Portal Interfaces</div>
           <div class="frontend-lane-label">Interaction Flow</div>
           <div class="frontend-lane-label">Backend Connection</div>
@@ -239,13 +240,13 @@
 
       <article class="tech-panel reveal">
         <h2>Final Justification</h2>
-        <p>HTML, CSS, and vanilla JavaScript are the right frontend choice for ExamFlow Nexus because the UI is focused on clear staff/student workflows, simple API integration, responsive documentation, and fast deployment. The backend carries the complex validation and security, while the frontend stays lightweight and easy to demonstrate.</p>
+        <p>HTML, CSS, and vanilla JavaScript are the right frontend choice for Examination Middleware because the UI is focused on clear staff/student workflows, simple API integration, responsive documentation, and fast deployment. The backend carries the complex validation and security, while the frontend stays lightweight and easy to demonstrate.</p>
       </article>
     </section>
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>Frontend technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a><p>Frontend technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="postgresql.html">PostgreSQL</a><a href="render.html">Render</a></div>
   </footer>
   <div class="toast"></div>

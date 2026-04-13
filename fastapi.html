@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FastAPI - ExamFlow Nexus</title>
+  <title>FastAPI - Examination Middleware</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +14,9 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
-      <div class="nav-menu">
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
+      <div class="nav-menu" id="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#architecture">Architecture</a>
         <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/portal/staff" target="_blank" rel="noopener noreferrer">Launch Project</a>
@@ -35,7 +36,7 @@
       <article class="tech-panel reveal">
         <h2>Role In System</h2>
         <ul>
-          <li>FastAPI acts as the core backend engine for ExamFlow Nexus.</li>
+          <li>FastAPI acts as the core backend engine for Examination Middleware.</li>
           <li>It sits between the staff/student portals and the backend services that process files, update the database, and submit data to Moodle LMS.</li>
           <li>It handles API routing for upload, dashboard, and submission endpoints.</li>
           <li>It validates request data before it reaches file processing or LMS integration logic.</li>
@@ -100,7 +101,7 @@
         <ul>
           <li><strong>Async performance:</strong> the system performs I/O-heavy work such as uploads, database access, and Moodle HTTP calls. FastAPI supports async handlers so slow external operations do not block unrelated requests.</li>
           <li><strong>Pydantic validation:</strong> request models and typed dependencies reduce invalid student IDs, malformed payloads, and unsafe submission states before service logic runs.</li>
-          <li><strong>API-first design:</strong> ExamFlow Nexus is a middleware platform, not just a rendered website. FastAPI fits route-driven integration work better than a minimal microframework.</li>
+          <li><strong>API-first design:</strong> Examination Middleware is a middleware platform, not just a rendered website. FastAPI fits route-driven integration work better than a minimal microframework.</li>
           <li><strong>Dependency injection:</strong> authentication, database sessions, and service dependencies can be composed cleanly per endpoint.</li>
         </ul>
       </article>
@@ -277,13 +278,13 @@
 
       <article class="tech-panel reveal">
         <h2>Final Justification</h2>
-        <p>FastAPI is the strongest backend fit for ExamFlow Nexus because the system is API-first, validation-heavy, I/O-bound, and integration-focused. It gives the middleware a clean way to receive staff uploads, protect student workflows with JWT, coordinate file and database services, and submit verified records to Moodle LMS without the overhead of a full-stack framework.</p>
+        <p>FastAPI is the strongest backend fit for Examination Middleware because the system is API-first, validation-heavy, I/O-bound, and integration-focused. It gives the middleware a clean way to receive staff uploads, protect student workflows with JWT, coordinate file and database services, and submit verified records to Moodle LMS without the overhead of a full-stack framework.</p>
       </article>
     </section>
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>FastAPI technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a><p>FastAPI technical documentation page.</p></div>
     <div class="footer-links"><a href="postgresql.html">PostgreSQL</a><a href="jwt.html">JWT</a><a href="moodle.html">Moodle</a></div>
   </footer>
   <div class="toast"></div>

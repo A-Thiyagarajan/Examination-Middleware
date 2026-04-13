@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moodle LMS - ExamFlow Nexus</title>
+  <title>Moodle LMS - Examination Middleware</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +14,9 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
-      <div class="nav-menu">
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
+      <div class="nav-menu" id="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#demo">Live Demo</a>
         <a class="nav-cta" href="https://exam-app-6r6v.onrender.com/lms" target="_blank" rel="noopener noreferrer">Launch Project</a>
@@ -33,10 +34,10 @@
 
     <section class="tech-page-grid">
       <article class="tech-panel reveal">
-        <h2>Role In ExamFlow Nexus</h2>
+        <h2>Role In Examination Middleware</h2>
         <ul>
           <li>Moodle acts as the external system for final submission and grading.</li>
-          <li>ExamFlow Nexus does not replace the LMS; it bridges scanned exam artifacts into LMS-compatible submission workflows.</li>
+          <li>Examination Middleware does not replace the LMS; it bridges scanned exam artifacts into LMS-compatible submission workflows.</li>
           <li>FastAPI prepares validated records, maps them to assignment context, and sends them to the Moodle integration layer.</li>
           <li>Moodle becomes the academic destination where faculty can review or grade records using familiar LMS concepts.</li>
         </ul>
@@ -44,9 +45,9 @@
 
       <article class="tech-panel reveal">
         <h2>System Integration Diagram</h2>
-        <p>Clean integration architecture showing how ExamFlow Nexus communicates with Moodle reliably through token-based API calls and retry-aware background processing.</p>
-        <div class="moodle-system-wrap" aria-label="ExamFlow Nexus to Moodle system integration diagram">
-          <div class="system-zone-label">ExamFlow Nexus Internal Services</div>
+        <p>Clean integration architecture showing how Examination Middleware communicates with Moodle reliably through token-based API calls and retry-aware background processing.</p>
+        <div class="moodle-system-wrap" aria-label="Examination Middleware to Moodle system integration diagram">
+          <div class="system-zone-label">Examination Middleware Internal Services</div>
           <div class="system-zone-label external">External Moodle LMS</div>
 
           <div class="system-box accent-orange backend-box-main">FastAPI Backend</div>
@@ -93,7 +94,7 @@
           <li><strong>Standard LMS:</strong> Moodle is widely used in academic environments and matches the project context of exams, students, faculty, assignments, and grades.</li>
           <li><strong>API support:</strong> Moodle can expose web-service style integration points for assignment and gradebook workflows.</li>
           <li><strong>Academic use:</strong> using Moodle makes the portfolio feel like a real institutional integration rather than a standalone demo.</li>
-          <li><strong>Clear boundary:</strong> ExamFlow Nexus remains a middleware system while Moodle remains the official learning platform.</li>
+          <li><strong>Clear boundary:</strong> Examination Middleware remains a middleware system while Moodle remains the official learning platform.</li>
         </ul>
       </article>
 
@@ -102,7 +103,7 @@
         <div class="comparison">
           <div>
             <h3>Custom LMS</h3>
-            <p>A custom LMS would dramatically increase scope: courses, enrollments, faculty dashboards, gradebook rules, and permissions. ExamFlow Nexus only needs to bridge scanned submissions into an LMS, not build the LMS itself.</p>
+            <p>A custom LMS would dramatically increase scope: courses, enrollments, faculty dashboards, gradebook rules, and permissions. Examination Middleware only needs to bridge scanned submissions into an LMS, not build the LMS itself.</p>
           </div>
           <div>
             <h3>Google Classroom</h3>
@@ -158,7 +159,7 @@
         </div>
         <div class="snippet-explainer">
           <p><strong>What it does:</strong> sends a POST request to Moodle's REST endpoint using the required web-service parameters, including the assignment ID and the uploaded draft file item ID.</p>
-          <p><strong>Why it is important:</strong> this is the core external API boundary. ExamFlow Nexus does not write directly into Moodle's database; it integrates through Moodle's official service layer.</p>
+          <p><strong>Why it is important:</strong> this is the core external API boundary. Examination Middleware does not write directly into Moodle's database; it integrates through Moodle's official service layer.</p>
         </div>
       </article>
 
@@ -279,13 +280,13 @@
 
       <article class="tech-panel reveal">
         <h2>Final Justification</h2>
-        <p>Moodle is the right integration target because ExamFlow Nexus is an examination middleware system, not a replacement LMS. Moodle provides the academic submission and grading context, while FastAPI and PostgreSQL handle validation, mapping, retry state, and auditability before data reaches the LMS.</p>
+        <p>Moodle is the right integration target because Examination Middleware is an examination middleware system, not a replacement LMS. Moodle provides the academic submission and grading context, while FastAPI and PostgreSQL handle validation, mapping, retry state, and auditability before data reaches the LMS.</p>
       </article>
     </section>
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>Moodle LMS integration technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a><p>Moodle LMS integration technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="jwt.html">JWT</a><a href="render.html">Render</a></div>
   </footer>
   <div class="toast"></div>
