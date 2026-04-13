@@ -14,7 +14,7 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
       <div class="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#demo">Live Demo</a>
@@ -43,13 +43,29 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Deployment Architecture</h2>
-        <pre class="snippet"><code>[ GitHub ] -&gt; [ Render ] -&gt; [ FastAPI App ] -&gt; [ Public URL ]</code></pre>
-        <div class="mini-diagram">
-          <span class="mini-node">GitHub</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Render</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">FastAPI App</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Public URL</span>
+        <h2>Deployment Architecture Diagram</h2>
+        <p>Clean deployment architecture showing how ExamFlow Nexus is built from GitHub on Render, connected to PostgreSQL, and served through a public URL.</p>
+        <div class="deployment-system-wrap" aria-label="ExamFlow Nexus Render deployment architecture diagram">
+          <div class="deployment-zone-label">Deployment Pipeline</div>
+          <div class="deployment-zone-label">Hosted Runtime</div>
+          <div class="deployment-zone-label">Serving Flow</div>
+
+          <div class="deployment-box repo-box-main">GitHub Repo</div>
+          <div class="deployment-arrow deploy-arrow-1">-&gt;</div>
+          <div class="deployment-box build-box-main">Render Build System</div>
+          <div class="deployment-arrow deploy-arrow-2">-&gt;</div>
+          <div class="deployment-box service-box-main">FastAPI Service</div>
+
+          <div class="deployment-arrow deployment-down down-db">|</div>
+          <div class="deployment-box database-box-main">PostgreSQL</div>
+          <div class="deployment-arrow deployment-down down-url">|</div>
+          <div class="deployment-box public-url-box-main">Public URL</div>
+
+          <div class="deployment-box user-request-box">User Request</div>
+          <div class="deployment-arrow request-arrow-1">-&gt;</div>
+          <div class="deployment-box render-edge-box">Render</div>
+          <div class="deployment-arrow request-arrow-2">-&gt;</div>
+          <div class="deployment-box response-box-main">App Response</div>
         </div>
       </article>
 
@@ -101,21 +117,98 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Runtime Command</h2>
-        <pre class="snippet"><code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></pre>
+        <h2>Deployment Config Showcase</h2>
+        <p>Render takes the project through a simple lifecycle: build dependencies, inject environment variables, start the FastAPI service, and keep it observable through a health endpoint.</p>
+        <div class="showcase-flow">
+          <span>Build</span>
+          <span>-&gt;</span>
+          <span>Deploy</span>
+          <span>-&gt;</span>
+          <span>Run</span>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Environment Configuration</h2>
-        <pre class="snippet"><code>DATABASE_URL=postgresql://...
-JWT_SECRET=render-managed-secret
-MOODLE_TOKEN=server-side-token
+        <h2>Render Service Config</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>render.yaml</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code>services:
+  - type: web
+    name: examflow-nexus
+    env: python
+    rootDir: exam_middleware
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> defines the Render web service, points it at the Python app directory, installs dependencies, starts Uvicorn, and configures a health check path.</p>
+          <p><strong>Why it is important:</strong> this is the deployment contract. Render uses it to turn a Git push into a running public service without manual server setup.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Environment Variables Setup</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>render-env</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code>DATABASE_URL=postgresql+asyncpg://user:password@host:5432/exam_middleware
+SECRET_KEY=render-managed-secret
+MOODLE_BASE_URL=https://your-moodle-site.com
+MOODLE_ADMIN_TOKEN=server-side-token
+DEBUG=false
 RELOAD=false
-PYTHONUNBUFFERED=1</code></pre>
-        <ul>
-          <li>Environment variables keep deployment-specific secrets out of GitHub.</li>
-          <li>Production flags should disable debug reload behavior and avoid verbose secret-bearing logs.</li>
-        </ul>
+PORT=10000</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> injects the database connection, signing secret, Moodle settings, and runtime flags through Render instead of hard-coding them in the repository.</p>
+          <p><strong>Why it is important:</strong> environment variables are what make the same codebase portable across local development and hosted deployment while keeping secrets out of Git.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Start Command</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>start-command</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> launches the FastAPI application object from `app.main`, binds it to all interfaces, and listens on the port Render provides at runtime.</p>
+          <p><strong>Why it is important:</strong> this is the handoff from deployment to execution. Once the build completes, Render uses this command to keep the service alive and routable.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Health Check Endpoint</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>health.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-decorator">@router.get</span>(<span class="tok-string">"/"</span>, response_model=<span class="tok-type">HealthCheckResponse</span>)
+<span class="tok-keyword">async def</span> <span class="tok-function">health_check</span>(db: <span class="tok-type">AsyncSession</span> = <span class="tok-function">Depends</span>(get_db)):
+    <span class="tok-keyword">await</span> db.execute(text(<span class="tok-string">"SELECT 1"</span>))
+    is_connected, message = <span class="tok-keyword">await</span> moodle_client.check_connection()
+    <span class="tok-keyword">return</span> <span class="tok-type">HealthCheckResponse</span>(
+        status=<span class="tok-string">"healthy"</span> <span class="tok-keyword">if</span> is_connected <span class="tok-keyword">else</span> <span class="tok-string">"degraded"</span>,
+        version=settings.app_version,
+        database=<span class="tok-string">"healthy"</span>,
+        moodle_connection=message,
+    )</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> verifies database connectivity, checks Moodle availability, and returns a structured health response that Render can probe at `/health`.</p>
+          <p><strong>Why it is important:</strong> Render uses this endpoint to decide whether the deployed app is actually alive after startup. It also gives operators a quick signal when deployment succeeded but dependencies are degraded.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
@@ -166,7 +259,7 @@ PYTHONUNBUFFERED=1</code></pre>
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>Render deployment technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>Render deployment technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="frontend.html">Frontend</a><a href="moodle.html">Moodle</a></div>
   </footer>
   <div class="toast"></div>

@@ -14,7 +14,7 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
       <div class="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#screenshots">Screenshots</a>
@@ -43,14 +43,31 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Architecture</h2>
-        <pre class="snippet"><code>[ UI ] -&gt; [ API Calls ] -&gt; [ Backend ] -&gt; [ Response ] -&gt; [ Render ]</code></pre>
-        <div class="mini-diagram">
-          <span class="mini-node">UI</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">API Calls</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Backend</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Response</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Render</span>
+        <h2>Frontend Architecture Diagram</h2>
+        <p>Simple UI architecture diagram showing how both portal experiences trigger frontend events, communicate with FastAPI, and return JSON-driven UI updates.</p>
+        <div class="frontend-system-wrap" aria-label="ExamFlow Nexus frontend architecture diagram">
+          <div class="frontend-lane-label">Portal Interfaces</div>
+          <div class="frontend-lane-label">Interaction Flow</div>
+          <div class="frontend-lane-label">Backend Connection</div>
+
+          <div class="frontend-box staff-ui-box">Staff Portal</div>
+          <div class="frontend-box student-ui-box">Student Portal</div>
+
+          <div class="frontend-arrow portal-merge-arrow">-&gt;</div>
+          <div class="frontend-box ui-box-main">User Interface</div>
+          <div class="frontend-arrow ui-event-arrow">-&gt;</div>
+          <div class="frontend-box event-box-main">Event Handling</div>
+          <div class="frontend-arrow event-api-arrow">-&gt;</div>
+          <div class="frontend-box api-box-main">API Calls</div>
+
+          <div class="frontend-arrow frontend-down down-backend">|</div>
+          <div class="frontend-box backend-box-ui">FastAPI Backend</div>
+          <div class="frontend-arrow frontend-down down-json">|</div>
+          <div class="frontend-box json-box-main">JSON Response</div>
+          <div class="frontend-arrow frontend-down down-state">|</div>
+          <div class="frontend-box state-box-main">State Update</div>
+          <div class="frontend-arrow frontend-down down-render">|</div>
+          <div class="frontend-box render-box-main">UI Rendering</div>
         </div>
       </article>
 
@@ -101,24 +118,85 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: Fetch Example</h2>
-        <pre class="snippet"><code>async function loadStudentDashboard(token) {
-  const response = await fetch("/student/dashboard", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!response.ok) throw new Error("Dashboard load failed");
-  return response.json();
-}</code></pre>
+        <h2>Frontend Interaction Showcase</h2>
+        <p>The browser layer stays intentionally thin: capture a user action, call the FastAPI backend with `fetch()`, then update the interface from the JSON response.</p>
+        <div class="showcase-flow">
+          <span>UI</span>
+          <span>-&gt;</span>
+          <span>API</span>
+          <span>-&gt;</span>
+          <span>UI</span>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: Event Handler</h2>
-        <pre class="snippet"><code>uploadForm.addEventListener("submit", async (event) =&gt; {
-  event.preventDefault();
-  const formData = new FormData(uploadForm);
-  const result = await fetch("/upload", { method: "POST", body: formData });
-  statusLabel.textContent = result.ok ? "Upload queued" : "Upload failed";
-});</code></pre>
+        <h2>API Fetch Call</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>student_portal.js</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async function</span> <span class="tok-function">loadPapers</span>() {
+  <span class="tok-keyword">const</span> response = <span class="tok-keyword">await</span> fetch(<span class="tok-string">"/student/papers"</span>, {
+    headers: { <span class="tok-string">"X-Session-ID"</span>: sessionToken }
+  });
+  <span class="tok-keyword">if</span> (!response.ok) {
+    <span class="tok-keyword">throw new</span> Error(<span class="tok-string">"Failed to load papers"</span>);
+  }
+  papers = <span class="tok-keyword">await</span> response.json();
+  renderPapers();
+}</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> requests the current student paper list from the backend using `fetch()`, passes the session token in the header, and converts the JSON response into frontend state.</p>
+          <p><strong>Why it is important:</strong> this is the main frontend-to-backend bridge. The UI never guesses submission state locally; it always asks FastAPI for the authoritative data.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Event Handling: Submit On Click</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>student_portal.js</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async function</span> <span class="tok-function">confirmSubmission</span>() {
+  showLoading();
+  <span class="tok-keyword">const</span> response = <span class="tok-keyword">await</span> fetch(<span class="tok-string">`/student/submit/${currentPaperId}`</span>, {
+    method: <span class="tok-string">"POST"</span>,
+    headers: { <span class="tok-string">"X-Session-ID"</span>: sessionToken }
+  });
+  <span class="tok-keyword">const</span> data = <span class="tok-keyword">await</span> response.json();
+  hideLoading();
+  showResult(response.ok &amp;&amp; data.success, data.message || <span class="tok-string">"Submission complete"</span>);
+}</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> responds to the user's submit action, triggers the Moodle submission API call, and wraps the request with loading-state behavior so the UI stays responsive.</p>
+          <p><strong>Why it is important:</strong> this is the event-driven piece of the workflow. A button click becomes a backend request without a page reload, which keeps the portal fast and task-focused.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>DOM Update</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>student_portal.js</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">function</span> <span class="tok-function">updateStats</span>() {
+  <span class="tok-keyword">const</span> total = papers.length;
+  <span class="tok-keyword">const</span> submitted = papers.filter(p =&gt; p.workflow_status === <span class="tok-string">"submitted_to_moodle"</span>).length;
+  <span class="tok-keyword">const</span> pending = total - submitted;
+  document.getElementById(<span class="tok-string">"totalPapers"</span>).textContent = total;
+  document.getElementById(<span class="tok-string">"pendingPapers"</span>).textContent = pending;
+  document.getElementById(<span class="tok-string">"submittedPapers"</span>).textContent = submitted;
+}</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> takes the latest paper data already returned by the backend and updates the visible counters in the interface using straightforward DOM writes.</p>
+          <p><strong>Why it is important:</strong> this closes the loop from UI to API back to UI. The backend responds with JSON, and the frontend turns that response into instant visual feedback for the user.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
@@ -167,7 +245,7 @@
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>Frontend technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>Frontend technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="postgresql.html">PostgreSQL</a><a href="render.html">Render</a></div>
   </footer>
   <div class="toast"></div>

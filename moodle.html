@@ -14,7 +14,7 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
       <div class="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#demo">Live Demo</a>
@@ -43,13 +43,35 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Architecture</h2>
-        <pre class="snippet"><code>[ FastAPI ] -&gt; [ Moodle API ] -&gt; [ Assignment Module ] -&gt; [ Gradebook ]</code></pre>
-        <div class="mini-diagram">
-          <span class="mini-node">FastAPI</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Moodle API</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Assignment Module</span><span class="mini-arrow">-&gt;</span>
-          <span class="mini-node">Gradebook</span>
+        <h2>System Integration Diagram</h2>
+        <p>Clean integration architecture showing how ExamFlow Nexus communicates with Moodle reliably through token-based API calls and retry-aware background processing.</p>
+        <div class="moodle-system-wrap" aria-label="ExamFlow Nexus to Moodle system integration diagram">
+          <div class="system-zone-label">ExamFlow Nexus Internal Services</div>
+          <div class="system-zone-label external">External Moodle LMS</div>
+
+          <div class="system-box accent-orange backend-box-main">FastAPI Backend</div>
+          <div class="system-arrow flow-1">-&gt;</div>
+          <div class="system-box accent-orange api-client-box">Moodle API Client</div>
+          <div class="system-arrow flow-2">-&gt;</div>
+          <div class="system-box accent-green auth-token-box">Auth Token</div>
+
+          <div class="system-arrow system-down down-1">|</div>
+          <div class="system-box accent-green assignment-map-box">Assignment Mapping</div>
+          <div class="system-arrow system-down down-2">|</div>
+          <div class="system-box accent-orange upload-box">Submission Upload</div>
+          <div class="system-arrow system-down down-3">|</div>
+          <div class="system-box accent-orange submission-api-box">Submission API</div>
+          <div class="system-arrow system-down down-4">|</div>
+          <div class="system-box accent-green gradebook-box">Gradebook</div>
+
+          <div class="system-box accent-green queue-box-main">Queue System</div>
+          <div class="system-arrow queue-flow-1">-&gt;</div>
+          <div class="system-box accent-orange retry-box-main">Retry Mechanism</div>
+          <div class="system-arrow queue-flow-2">-&gt;</div>
+          <div class="system-box accent-orange queue-api-box">Moodle API</div>
+
+          <div class="api-link-tag">API communication</div>
+          <div class="retry-link-tag">Retry path for transient Moodle failures</div>
         </div>
       </article>
 
@@ -101,17 +123,118 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: HTTP Request To Moodle</h2>
-        <pre class="snippet"><code>async def submit_to_moodle(submission):
-    payload = {
-        "assignment_id": submission.moodle_assignment_id,
-        "student_id": submission.student.username,
-        "file_url": submission.artifact_url,
+        <h2>Integration Code Showcase</h2>
+        <p>The Moodle handoff is a real external API integration: the backend authenticates with a token, uploads the scanned artifact, links it to the assignment, verifies the result, and queues retries when Moodle is temporarily unavailable.</p>
+        <div class="showcase-flow">
+          <span>Map</span>
+          <span>-&gt;</span>
+          <span>Upload</span>
+          <span>-&gt;</span>
+          <span>Submit</span>
+          <span>-&gt;</span>
+          <span>Retry</span>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>API Request: POST To Moodle</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>moodle_client.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async def</span> <span class="tok-function">save_submission</span>(self, assignment_id: <span class="tok-type">int</span>, item_id: <span class="tok-type">int</span>, token: <span class="tok-type">str</span> | <span class="tok-constant">None</span> = <span class="tok-constant">None</span>):
+    client = <span class="tok-keyword">await</span> self._get_client()
+    params = {
+        <span class="tok-string">"wstoken"</span>: token <span class="tok-keyword">or</span> self.token,
+        <span class="tok-string">"wsfunction"</span>: <span class="tok-string">"mod_assign_save_submission"</span>,
+        <span class="tok-string">"moodlewsrestformat"</span>: <span class="tok-string">"json"</span>,
+        <span class="tok-string">"assignmentid"</span>: <span class="tok-type">str</span>(assignment_id),
+        <span class="tok-string">"plugindata[files_filemanager]"</span>: <span class="tok-type">str</span>(item_id),
     }
-    headers = {"Authorization": f"Bearer {MOODLE_TOKEN}"}
-    response = await httpx.post(MOODLE_SUBMIT_URL, json=payload, headers=headers)
+    response = <span class="tok-keyword">await</span> client.post(<span class="tok-string">f"{self.base_url}/webservice/rest/server.php"</span>, data=params)
     response.raise_for_status()
-    return response.json()</code></pre>
+    <span class="tok-keyword">return</span> response.json()</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> sends a POST request to Moodle's REST endpoint using the required web-service parameters, including the assignment ID and the uploaded draft file item ID.</p>
+          <p><strong>Why it is important:</strong> this is the core external API boundary. ExamFlow Nexus does not write directly into Moodle's database; it integrates through Moodle's official service layer.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Token Usage</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>moodle_client.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async def</span> <span class="tok-function">get_site_info</span>(self, token: <span class="tok-type">str</span> | <span class="tok-constant">None</span> = <span class="tok-constant">None</span>):
+    client = <span class="tok-keyword">await</span> self._get_client()
+    ws_token = token <span class="tok-keyword">or</span> self.token
+    params = {
+        <span class="tok-string">"wstoken"</span>: ws_token,
+        <span class="tok-string">"wsfunction"</span>: <span class="tok-string">"core_webservice_get_site_info"</span>,
+        <span class="tok-string">"moodlewsrestformat"</span>: <span class="tok-string">"json"</span>,
+    }
+    response = <span class="tok-keyword">await</span> client.post(<span class="tok-string">f"{self.base_url}/webservice/rest/server.php"</span>, data=params)
+    response.raise_for_status()
+    <span class="tok-keyword">return</span> response.json()</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> uses the Moodle web-service token on each request as `wstoken`, which lets the backend act on behalf of the authenticated LMS user without exposing credentials again.</p>
+          <p><strong>Why it is important:</strong> token-based integration keeps the Moodle boundary stateless and secure. Every request is independently authorized by Moodle using the provided token.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Submission Logic</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>submission_service.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async def</span> <span class="tok-function">_execute_submission</span>(self, artifact, assignment_id: <span class="tok-type">int</span>, moodle_token: <span class="tok-type">str</span>, lock_submission: <span class="tok-type">bool</span>):
+    client = MoodleClient(token=moodle_token)
+    upload_result = <span class="tok-keyword">await</span> client.upload_file(file_path=artifact.file_blob_path, token=moodle_token, filename=artifact.original_filename)
+    item_id = upload_result[<span class="tok-string">"itemid"</span>]
+    <span class="tok-keyword">await</span> client.get_submission_status(assignment_id=assignment_id, token=moodle_token)
+    save_result = <span class="tok-keyword">await</span> client.save_submission(assignment_id=assignment_id, item_id=item_id, token=moodle_token)
+    status_result = <span class="tok-keyword">await</span> client.get_submission_status(assignment_id=assignment_id, token=moodle_token)
+    <span class="tok-keyword">if</span> lock_submission <span class="tok-keyword">and</span> status_result[<span class="tok-string">"lastattempt"</span>].get(<span class="tok-string">"cansubmit"</span>, <span class="tok-constant">False</span>):
+        <span class="tok-keyword">await</span> client.submit_for_grading(assignment_id=assignment_id, token=moodle_token)
+    <span class="tok-keyword">return</span> {<span class="tok-string">"item_id"</span>: item_id, <span class="tok-string">"save_result"</span>: save_result}</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> orchestrates the full Moodle handoff: upload to draft area, verify assignment access, save the submission, re-check status, and optionally finalize for grading.</p>
+          <p><strong>Why it is important:</strong> Moodle submission is not one API call. This service layer is what turns a verified scanned paper into a reliable LMS submission workflow.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Retry Logic</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>submission_service.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">except</span> <span class="tok-type">MoodleAPIError</span> <span class="tok-keyword">as</span> e:
+    should_queue = self._should_queue_for_retry(e)
+    <span class="tok-keyword">await</span> self.artifact_service.mark_failed(
+        artifact_id=artifact.id,
+        error_message=<span class="tok-function">str</span>(e),
+        queue_for_retry=should_queue,
+    )
+    <span class="tok-keyword">if</span> should_queue:
+        <span class="tok-keyword">return</span> <span class="tok-constant">False</span>, <span class="tok-string">"Submission queued - Moodle is temporarily unavailable"</span>, {
+            <span class="tok-string">"queued"</span>: <span class="tok-constant">True</span>, <span class="tok-string">"error"</span>: <span class="tok-function">str</span>(e)
+        }
+    <span class="tok-keyword">return</span> <span class="tok-constant">False</span>, <span class="tok-string">f"Submission failed: {e.message}"</span>, {<span class="tok-string">"error"</span>: <span class="tok-function">str</span>(e)}</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> catches Moodle API failures, classifies transient errors such as maintenance or connection issues, marks the artifact accordingly, and queues safe retries instead of losing the submission attempt.</p>
+          <p><strong>Why it is important:</strong> external APIs fail. This retry-aware path is what makes the Moodle integration production-oriented rather than a fragile one-shot HTTP call.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
@@ -162,7 +285,7 @@
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>Moodle LMS integration technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>Moodle LMS integration technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="jwt.html">JWT</a><a href="render.html">Render</a></div>
   </footer>
   <div class="toast"></div>

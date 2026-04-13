@@ -34,7 +34,11 @@ if (menuToggle && navMenu) {
 
 document.querySelectorAll(".copy-btn").forEach((button) => {
   button.addEventListener("click", async () => {
-    const value = button.dataset.copy;
+    const value =
+      button.dataset.copy ||
+      button.closest(".code-showcase")?.querySelector("code")?.innerText ||
+      "";
+    if (!value) return;
     try {
       await navigator.clipboard.writeText(value);
     } catch (error) {
@@ -46,10 +50,11 @@ document.querySelectorAll(".copy-btn").forEach((button) => {
       tempInput.remove();
     }
 
+    const originalLabel = button.dataset.copy ? "Copy" : "Copy";
     button.textContent = "Copied";
     showToast("Copied to clipboard");
     setTimeout(() => {
-      button.textContent = "Copy";
+      button.textContent = originalLabel;
     }, 1200);
   });
 });

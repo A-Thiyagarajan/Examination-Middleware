@@ -10,11 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="fastapi-page">
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
       <div class="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#architecture">Architecture</a>
@@ -23,7 +23,7 @@
     </nav>
   </header>
 
-  <main class="tech-page-main">
+  <main class="tech-page-main fastapi-page-main">
     <section class="tech-page-hero reveal">
       <a class="back-link" href="index.html#tech">Back to Tech Stack</a>
       <p class="eyebrow">Core Backend Engine</p>
@@ -130,36 +130,118 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: FastAPI Route</h2>
-        <pre class="snippet"><code>@router.post("/upload")
-async def upload_exam_file(
-    file: UploadFile,
-    staff=Depends(require_staff),
-    db: Session = Depends(get_db),
-):
-    artifact = await file_processor.store_and_parse(file)
-    submission = submission_service.create(db, artifact, staff.id)
-    return {"submission_id": submission.id, "status": submission.status}</code></pre>
+        <h2>Technical Code Showcase</h2>
+        <p>This path is the heart of the backend: FastAPI receives the request, validates the upload, hands work to services, and returns a structured response the portal can render immediately.</p>
+        <div class="showcase-flow">
+          <span>Request</span>
+          <span>-&gt;</span>
+          <span>Validation</span>
+          <span>-&gt;</span>
+          <span>Processing</span>
+          <span>-&gt;</span>
+          <span>Response</span>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: Dependency Injection</h2>
-        <pre class="snippet"><code>def require_staff(payload: dict = Depends(validate_jwt)):
-    if payload.get("role") != "staff":
-        raise HTTPException(status_code=403, detail="Staff access required")
-    return payload</code></pre>
+        <h2>API Route: Upload Endpoint</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>upload.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-decorator">@router.post</span>(<span class="tok-string">"/single"</span>, response_model=<span class="tok-type">FileUploadResponse</span>)
+<span class="tok-keyword">async def</span> <span class="tok-function">upload_single_file</span>(file: <span class="tok-type">UploadFile</span> = <span class="tok-function">File</span>(...), exam_session: <span class="tok-type">str</span> = <span class="tok-function">Form</span>(...),
+    db: <span class="tok-type">AsyncSession</span> = <span class="tok-function">Depends</span>(get_db), current_staff: <span class="tok-type">StaffUser</span> = <span class="tok-function">Depends</span>(get_current_staff)):
+    content = <span class="tok-keyword">await</span> file.read()
+    is_valid, message, metadata = file_processor.validate_file(content, file.filename)
+    <span class="tok-keyword">if not</span> is_valid:
+        <span class="tok-keyword">return</span> <span class="tok-type">FileUploadResponse</span>(success=<span class="tok-constant">False</span>, message=message, errors=[message])
+    file_path, file_hash = <span class="tok-keyword">await</span> file_processor.save_file(content, file.filename, <span class="tok-string">"pending"</span>)
+    artifact = <span class="tok-keyword">await</span> artifact_service.create_artifact(file_blob_path=file_path, file_hash=file_hash, parsed_reg_no=metadata[<span class="tok-string">"parsed_register_no"</span>])
+    <span class="tok-keyword">return</span> <span class="tok-type">FileUploadResponse</span>(success=<span class="tok-constant">True</span>, artifact_uuid=<span class="tok-type">str</span>(artifact.artifact_uuid), workflow_status=artifact.workflow_status.value)</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> accepts a multipart file upload from staff, reads the scanned paper asynchronously, validates the filename and file type, then persists the file before returning structured metadata.</p>
+          <p><strong>Why it is important:</strong> this is the first entry point in the pipeline, so it proves FastAPI can handle file input, dependency injection, validation, and JSON response generation in one clean request cycle.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: Async Submission</h2>
-        <pre class="snippet"><code>@router.post("/submit")
-async def submit_to_lms(
-    submission_id: int,
-    student=Depends(require_student),
-    db: Session = Depends(get_db),
-):
-    result = await submission_service.submit_to_moodle(db, submission_id, student["sub"])
-    return {"status": result.status, "moodle_ref": result.reference}</code></pre>
+        <h2>Dependency Injection: JWT-Protected Staff Access</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>auth.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async def</span> <span class="tok-function">get_current_staff</span>(
+    token: <span class="tok-type">str</span> = <span class="tok-function">Depends</span>(oauth2_scheme),
+    db: <span class="tok-type">AsyncSession</span> = <span class="tok-function">Depends</span>(get_db),
+) -&gt; <span class="tok-type">StaffUser</span>:
+    payload = decode_access_token(token)
+    <span class="tok-keyword">if</span> payload <span class="tok-keyword">is</span> <span class="tok-constant">None</span> <span class="tok-keyword">or</span> payload.get(<span class="tok-string">"type"</span>) != <span class="tok-string">"staff"</span>:
+        <span class="tok-keyword">raise</span> <span class="tok-type">HTTPException</span>(status_code=status.HTTP_401_UNAUTHORIZED, detail=<span class="tok-string">"Could not validate credentials"</span>)
+    result = <span class="tok-keyword">await</span> db.execute(select(StaffUser).where(StaffUser.id == <span class="tok-type">int</span>(payload[<span class="tok-string">"sub"</span>])))
+    staff = result.scalar_one_or_none()
+    <span class="tok-keyword">if</span> staff <span class="tok-keyword">is</span> <span class="tok-constant">None</span> <span class="tok-keyword">or not</span> staff.is_active:
+        <span class="tok-keyword">raise</span> <span class="tok-type">HTTPException</span>(status_code=status.HTTP_403_FORBIDDEN, detail=<span class="tok-string">"Account is disabled"</span>)
+    <span class="tok-keyword">return</span> staff</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> resolves the current staff user through FastAPI dependencies, decodes the bearer token, checks role/type claims, and loads the active staff record from the database.</p>
+          <p><strong>Why it is important:</strong> it keeps authorization outside the route body, which makes protected endpoints smaller, easier to test, and much harder to bypass accidentally.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Service Layer: File Parsing And Validation</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>file_processor.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">def</span> <span class="tok-function">validate_file</span>(self, file_content: <span class="tok-type">bytes</span>, filename: <span class="tok-type">str</span>):
+    metadata = {<span class="tok-string">"original_filename"</span>: filename, <span class="tok-string">"size_bytes"</span>: <span class="tok-function">len</span>(file_content)}
+    <span class="tok-keyword">if</span> <span class="tok-function">len</span>(file_content) &gt; settings.max_file_size_bytes:
+        <span class="tok-keyword">return</span> <span class="tok-constant">False</span>, <span class="tok-string">"File too large"</span>, metadata
+    ext = os.path.splitext(filename)[1].lower()
+    <span class="tok-keyword">if</span> ext <span class="tok-keyword">not in</span> settings.allowed_extensions_list:
+        <span class="tok-keyword">return</span> <span class="tok-constant">False</span>, <span class="tok-string">"Invalid file type"</span>, metadata
+    register_no, subject_code, is_parsed = self.parse_filename(filename)
+    metadata.update({<span class="tok-string">"parsed_register_no"</span>: register_no, <span class="tok-string">"parsed_subject_code"</span>: subject_code})
+    <span class="tok-keyword">if not</span> is_parsed:
+        <span class="tok-keyword">return</span> <span class="tok-constant">False</span>, <span class="tok-string">"Invalid filename format. Expected: REGISTER_SUBJECT.pdf"</span>, metadata
+    <span class="tok-keyword">return</span> <span class="tok-constant">True</span>, <span class="tok-string">"File validated successfully"</span>, metadata</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> validates upload size, allowed extensions, and the register-number-plus-subject filename convention, then returns normalized metadata for downstream storage and mapping.</p>
+          <p><strong>Why it is important:</strong> this is where the backend converts raw scanned files into trusted domain data, which prevents malformed papers from reaching the database or Moodle submission flow.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Async Processing: Moodle Submission Workflow</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>submission_service.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async def</span> <span class="tok-function">submit_artifact</span>(self, artifact_uuid: <span class="tok-type">str</span>, moodle_token: <span class="tok-type">str</span>, register_number: <span class="tok-type">str</span>):
+    artifact = <span class="tok-keyword">await</span> self.artifact_service.get_by_uuid(artifact_uuid)
+    assignment_id = <span class="tok-keyword">await</span> self._resolve_assignment_id(artifact)
+    <span class="tok-keyword">try</span>:
+        result = <span class="tok-keyword">await</span> self._execute_submission(artifact=artifact, assignment_id=assignment_id, moodle_token=moodle_token, lock_submission=<span class="tok-constant">True</span>)
+        <span class="tok-keyword">await</span> self.artifact_service.mark_submitted(artifact_id=artifact.id, moodle_submission_id=result.get(<span class="tok-string">"submission_id"</span>))
+        <span class="tok-keyword">return</span> <span class="tok-constant">True</span>, <span class="tok-string">"Submission completed successfully"</span>, result
+    <span class="tok-keyword">except</span> <span class="tok-type">MoodleAPIError</span> <span class="tok-keyword">as</span> e:
+        should_queue = self._should_queue_for_retry(e)
+        <span class="tok-keyword">await</span> self.artifact_service.mark_failed(artifact_id=artifact.id, error_message=<span class="tok-function">str</span>(e), queue_for_retry=should_queue)
+        <span class="tok-keyword">return</span> <span class="tok-constant">False</span>, <span class="tok-string">"Submission queued - Moodle is temporarily unavailable"</span>, {<span class="tok-string">"queued"</span>: should_queue}</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> awaits assignment resolution, runs the Moodle submission workflow asynchronously, marks success on completion, and falls back to retry-aware failure handling for transient LMS errors.</p>
+          <p><strong>Why it is important:</strong> it demonstrates the production path after upload: the backend can continue from validated artifact to Moodle delivery without blocking the API design on synchronous external calls.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
@@ -201,7 +283,7 @@ async def submit_to_lms(
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>FastAPI technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>FastAPI technical documentation page.</p></div>
     <div class="footer-links"><a href="postgresql.html">PostgreSQL</a><a href="jwt.html">JWT</a><a href="moodle.html">Moodle</a></div>
   </footer>
   <div class="toast"></div>

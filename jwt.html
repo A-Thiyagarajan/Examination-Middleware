@@ -14,7 +14,7 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
       <div class="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#credentials">Credentials</a>
@@ -117,33 +117,91 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: JWT Encode</h2>
-        <pre class="snippet"><code>def create_access_token(user_id: str, role: str) -&gt; str:
-    payload = {
-        "sub": user_id,
-        "role": role,
-        "exp": datetime.utcnow() + timedelta(minutes=30),
-    }
-    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")</code></pre>
+        <h2>JWT Security Showcase</h2>
+        <p>The authentication path is intentionally small and stateless: login issues a signed token, the client sends it on each request, and FastAPI dependencies validate it before protected business logic runs.</p>
+        <div class="showcase-flow">
+          <span>Login</span>
+          <span>-&gt;</span>
+          <span>Token</span>
+          <span>-&gt;</span>
+          <span>Request</span>
+          <span>-&gt;</span>
+          <span>Validation</span>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: JWT Decode</h2>
-        <pre class="snippet"><code>def decode_access_token(token: str) -&gt; dict:
-    try:
-        return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")</code></pre>
+        <h2>Token Creation</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>security.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">def</span> <span class="tok-function">create_access_token</span>(data: <span class="tok-type">dict</span>, expires_delta: timedelta | <span class="tok-constant">None</span> = <span class="tok-constant">None</span>) -&gt; <span class="tok-type">str</span>:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (expires_delta <span class="tok-keyword">or</span> timedelta(minutes=settings.access_token_expire_minutes))
+    to_encode.update({
+        <span class="tok-string">"exp"</span>: expire,
+        <span class="tok-string">"iat"</span>: datetime.now(timezone.utc),
+        <span class="tok-string">"jti"</span>: secrets.token_hex(<span class="tok-type">16</span>),
+    })
+    <span class="tok-keyword">return</span> jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> signs a JWT with subject data plus expiration, issued-at time, and a unique token identifier before returning it to the authenticated client.</p>
+          <p><strong>Why it is important:</strong> this is the source of stateless authentication. The server does not need to keep a session row for every staff request because the token carries the claims needed for later validation.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: FastAPI Dependency</h2>
-        <pre class="snippet"><code>def require_student(payload: dict = Depends(validate_jwt)):
-    if payload.get("role") != "student":
-        raise HTTPException(status_code=403, detail="Student access required")
-    return payload</code></pre>
+        <h2>Token Validation Dependency</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>auth.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-keyword">async def</span> <span class="tok-function">get_current_staff</span>(
+    token: <span class="tok-type">str</span> = <span class="tok-function">Depends</span>(oauth2_scheme),
+    db: <span class="tok-type">AsyncSession</span> = <span class="tok-function">Depends</span>(get_db),
+) -&gt; <span class="tok-type">StaffUser</span>:
+    payload = decode_access_token(token)
+    <span class="tok-keyword">if</span> payload <span class="tok-keyword">is</span> <span class="tok-constant">None</span> <span class="tok-keyword">or</span> payload.get(<span class="tok-string">"type"</span>) != <span class="tok-string">"staff"</span>:
+        <span class="tok-keyword">raise</span> <span class="tok-type">HTTPException</span>(status_code=status.HTTP_401_UNAUTHORIZED, detail=<span class="tok-string">"Could not validate credentials"</span>)
+    result = <span class="tok-keyword">await</span> db.execute(select(StaffUser).where(StaffUser.id == <span class="tok-type">int</span>(payload[<span class="tok-string">"sub"</span>])))
+    staff = result.scalar_one_or_none()
+    <span class="tok-keyword">if</span> staff <span class="tok-keyword">is</span> <span class="tok-constant">None</span> <span class="tok-keyword">or not</span> staff.is_active:
+        <span class="tok-keyword">raise</span> <span class="tok-type">HTTPException</span>(status_code=status.HTTP_403_FORBIDDEN, detail=<span class="tok-string">"Account is disabled"</span>)
+    <span class="tok-keyword">return</span> staff</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> reads the bearer token from the request, decodes it, checks the actor type, then resolves the concrete active staff user from the database before the route executes.</p>
+          <p><strong>Why it is important:</strong> FastAPI dependency injection turns token validation into a reusable boundary. Every protected route gets the same auth guarantees without repeating decode logic in controller code.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Protected Route Example</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>upload.py</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code><span class="tok-decorator">@router.post</span>(<span class="tok-string">"/single"</span>, response_model=<span class="tok-type">FileUploadResponse</span>)
+<span class="tok-keyword">async def</span> <span class="tok-function">upload_single_file</span>(
+    file: <span class="tok-type">UploadFile</span> = <span class="tok-function">File</span>(...),
+    exam_session: <span class="tok-type">str</span> = <span class="tok-function">Form</span>(...),
+    db: <span class="tok-type">AsyncSession</span> = <span class="tok-function">Depends</span>(get_db),
+    current_staff: <span class="tok-type">StaffUser</span> = <span class="tok-function">Depends</span>(get_current_staff),
+):
+    content = <span class="tok-keyword">await</span> file.read()
+    is_valid, message, metadata = file_processor.validate_file(content, file.filename)
+    <span class="tok-keyword">if not</span> is_valid:
+        <span class="tok-keyword">return</span> <span class="tok-type">FileUploadResponse</span>(success=<span class="tok-constant">False</span>, message=message, errors=[message])</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> declares a protected upload endpoint where the request is only allowed to reach file-processing logic if `get_current_staff` successfully validates the JWT first.</p>
+          <p><strong>Why it is important:</strong> this demonstrates the full flow in practice: login produces the token, the client attaches it to the request, and FastAPI blocks unauthorized callers before exam artifacts are touched.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
@@ -186,7 +244,7 @@
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>JWT authentication technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>JWT authentication technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="postgresql.html">PostgreSQL</a><a href="moodle.html">Moodle</a></div>
   </footer>
   <div class="toast"></div>

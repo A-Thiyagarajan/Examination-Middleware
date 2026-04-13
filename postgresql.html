@@ -14,7 +14,7 @@
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar">
-      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a>
       <div class="nav-menu">
         <a href="index.html#tech">Tech Stack</a>
         <a href="index.html#architecture">Architecture</a>
@@ -117,29 +117,119 @@
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: Table Schema</h2>
-        <pre class="snippet"><code>CREATE TABLE submissions (
-  id SERIAL PRIMARY KEY,
-  student_id INTEGER NOT NULL REFERENCES users(id),
-  artifact_id INTEGER NOT NULL REFERENCES artifacts(id),
-  subject_id INTEGER NOT NULL REFERENCES subjects(id),
-  status VARCHAR(32) NOT NULL DEFAULT 'uploaded',
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_submissions_student_status
-ON submissions (student_id, status);</code></pre>
+        <h2>Technical SQL Showcase</h2>
+        <p>ExamFlow Nexus uses relational tables to connect authenticated users, scanned exam artifacts, and submission-state tracking. The workflow depends on those links being explicit and queryable.</p>
       </article>
 
       <article class="tech-panel reveal">
-        <h2>Code Snippet: Join Query</h2>
-        <pre class="snippet"><code>SELECT s.id, s.status, a.file_path, sub.code, sub.name
-FROM submissions s
-JOIN artifacts a ON a.id = s.artifact_id
-JOIN subjects sub ON sub.id = s.subject_id
-JOIN users u ON u.id = s.student_id
-WHERE u.username = :student_username
-ORDER BY s.created_at DESC;</code></pre>
+        <h2>Table Schema: Users, Artifacts, Submissions</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>schema.sql</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code>CREATE TABLE staff_users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  role VARCHAR(50) DEFAULT 'staff',
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE examination_artifacts (
+  id SERIAL PRIMARY KEY,
+  artifact_uuid UUID UNIQUE NOT NULL,
+  parsed_reg_no VARCHAR(20),
+  parsed_subject_code VARCHAR(20),
+  file_blob_path VARCHAR(512) NOT NULL,
+  workflow_status VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE submission_queue (
+  id SERIAL PRIMARY KEY,
+  artifact_id INTEGER NOT NULL,
+  status VARCHAR(20) DEFAULT 'QUEUED',
+  retry_count INTEGER DEFAULT 0
+);</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> defines the core relational building blocks for the workflow: staff identity, scanned exam artifacts, and queued submission state for Moodle delivery.</p>
+          <p><strong>Why it is important:</strong> this structure mirrors the actual project flow where uploads become durable artifacts first, then move through a tracked submission pipeline instead of relying on temporary in-memory state.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Foreign Key Relationships</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>relationships.sql</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code>ALTER TABLE examination_artifacts
+  ADD CONSTRAINT fk_artifact_uploaded_by
+  FOREIGN KEY (uploaded_by_staff_id) REFERENCES staff_users(id);
+
+ALTER TABLE submission_queue
+  ADD CONSTRAINT fk_queue_artifact
+  FOREIGN KEY (artifact_id) REFERENCES examination_artifacts(id);
+
+ALTER TABLE audit_logs
+  ADD CONSTRAINT fk_audit_artifact
+  FOREIGN KEY (artifact_id) REFERENCES examination_artifacts(id);</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> links uploaded artifacts back to the staff member who created them, then links both retry state and audit history back to the same artifact row.</p>
+          <p><strong>Why it is important:</strong> these relationships preserve traceability. Every queued submission and every audit event can be tied to a concrete scanned paper, which is critical for review, retry, and debugging.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Query Example: Users + Submissions + Artifacts</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>dashboard-query.sql</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code>SELECT
+  su.username,
+  ea.artifact_uuid,
+  ea.parsed_reg_no,
+  ea.parsed_subject_code,
+  ea.workflow_status,
+  sq.status AS submission_status,
+  sq.retry_count
+FROM staff_users su
+JOIN examination_artifacts ea ON ea.uploaded_by_staff_id = su.id
+LEFT JOIN submission_queue sq ON sq.artifact_id = ea.id
+WHERE ea.parsed_reg_no = :register_number
+ORDER BY ea.uploaded_at DESC;</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> joins the uploader, the artifact record, and the submission queue so the system can show who uploaded a paper, what metadata was parsed, and whether Moodle delivery is pending, retrying, or complete.</p>
+          <p><strong>Why it is important:</strong> this is the exact kind of relational query that supports staff review and student-facing workflow visibility. The database does not just store rows; it assembles the end-to-end paper lifecycle.</p>
+        </div>
+      </article>
+
+      <article class="tech-panel reveal">
+        <h2>Index Example</h2>
+        <div class="code-showcase">
+          <div class="code-showcase-top">
+            <span>indexes.sql</span>
+            <button class="copy-btn" type="button">Copy</button>
+          </div>
+          <pre class="snippet snippet-code"><code>CREATE INDEX ix_artifacts_reg_subject
+  ON examination_artifacts (parsed_reg_no, parsed_subject_code);
+
+CREATE INDEX ix_artifacts_status
+  ON examination_artifacts (workflow_status);
+
+CREATE INDEX ix_queue_status_retry
+  ON submission_queue (status, next_retry_at);</code></pre>
+        </div>
+        <div class="snippet-explainer">
+          <p><strong>What it does:</strong> accelerates the most common access paths: finding a paper by register and subject, filtering artifacts by workflow status, and scanning the retry queue in processing order.</p>
+          <p><strong>Why it is important:</strong> these indexes make the exam workflow practical under load. Upload review, student lookups, and queued Moodle retries stay fast because the database is optimized for the real query patterns.</p>
+        </div>
       </article>
 
       <article class="tech-panel reveal">
@@ -182,7 +272,7 @@ ORDER BY s.created_at DESC;</code></pre>
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>PostgreSQL technical documentation page.</p></div>
+    <div><a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>ExamFlow Nexus</span></a><p>PostgreSQL technical documentation page.</p></div>
     <div class="footer-links"><a href="fastapi.html">FastAPI</a><a href="jwt.html">JWT</a><a href="render.html">Render</a></div>
   </footer>
   <div class="toast"></div>

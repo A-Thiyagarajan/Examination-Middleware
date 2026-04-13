@@ -11,11 +11,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body id="top">
+<body id="top" class="home-page">
   <div class="ambient" aria-hidden="true"></div>
   <header class="site-header">
     <nav class="navbar" aria-label="Main navigation">
-      <a class="brand" href="index.html"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span><span class="sr-only">Open navigation</span></button>
       <div class="nav-menu" id="nav-menu">
         <a href="#about">About</a><a href="#features">Features</a><a href="#architecture">Architecture</a><a href="#workflow">Workflow</a><a href="#tech">Tech Stack</a><a href="#credentials">Credentials</a><a href="#demo">Live Demo</a>
@@ -28,7 +28,7 @@
     <section class="hero section">
       <div class="hero-content reveal">
         <p class="eyebrow">SaaS Product + System Design Portfolio</p>
-        <h1 class="gradient-title hero-title-compact">Examination Middleware System</h1>
+        <h1 class="gradient-title hero-title-compact">Examination Submission Framework</h1>
         <p class="hero-copy">A modern FastAPI middleware layer that connects staff uploads, student verification, resilient submission handling, and Moodle LMS grade workflows.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="https://exam-app-6r6v.onrender.com/portal/staff" target="_blank" rel="noopener noreferrer">Explore Staff Portal</a>
@@ -52,9 +52,9 @@
     <section class="section divider" id="about">
       <div class="section-heading reveal"><p class="eyebrow">Why It Exists</p><h2>About Project</h2><p>Traditional LMS workflows are built around digital submissions, but many institutions still evaluate scanned physical answer scripts. ExamFlow Nexus bridges that mismatch with a middleware layer that tracks uploads, verifies students, persists records, and prepares submissions for Moodle.</p></div>
       <div class="card-grid three">
-        <article class="glass-card reveal"><span class="card-icon blue">UP</span><h3>Smart Upload Processing</h3><p>Staff upload scanned exam papers into a structured workflow instead of manually pushing files through disconnected tools.</p></article>
-        <article class="glass-card reveal"><span class="card-icon green">ID</span><h3>Student Verification</h3><p>Students use assigned credentials and register numbers so each answer script is tied to the right identity.</p></article>
-        <article class="glass-card reveal"><span class="card-icon purple">LM</span><h3>LMS Integration</h3><p>The backend turns processed submissions into LMS-ready data for Moodle assignment and gradebook workflows.</p></article>
+        <article class="glass-card reveal"><span class="card-icon blue">&#128228;</span><h3>Smart Upload Processing</h3><p>Staff upload scanned exam papers into a structured workflow instead of manually pushing files through disconnected tools.</p></article>
+        <article class="glass-card reveal"><span class="card-icon green">&#9989;</span><h3>Student Verification</h3><p>Students use assigned credentials and register numbers so each answer script is tied to the right identity.</p></article>
+        <article class="glass-card reveal"><span class="card-icon purple">&#127891;</span><h3>LMS Integration</h3><p>The backend turns processed submissions into LMS-ready data for Moodle assignment and gradebook workflows.</p></article>
       </div>
     </section>
 
@@ -90,38 +90,38 @@
     <section class="section divider" id="workflow">
       <div class="section-heading reveal"><p class="eyebrow">Operational Flow</p><h2>Workflow</h2><p>The journey is simple for users, while the backend keeps each handoff explicit and recoverable.</p></div>
       <div class="workflow-steps">
-        <article class="step-card reveal"><span>⬆</span><h3>Upload</h3><p>Staff sends scanned paper.</p></article>
-        <article class="step-card reveal"><span>⌕</span><h3>Parse</h3><p>Backend reads metadata.</p></article>
-        <article class="step-card reveal"><span>✓</span><h3>Validate</h3><p>Identity and fields are checked.</p></article>
-        <article class="step-card reveal"><span>DB</span><h3>Store</h3><p>Records and files persist.</p></article>
-        <article class="step-card reveal"><span>↧</span><h3>Fetch</h3><p>Student dashboard loads data.</p></article>
-        <article class="step-card reveal"><span>ID</span><h3>Verify</h3><p>Student confirms access.</p></article>
-        <article class="step-card reveal"><span>API</span><h3>Submit</h3><p>Moodle client sends payload.</p></article>
-        <article class="step-card reveal"><span>A+</span><h3>Grade</h3><p>LMS gradebook receives result.</p></article>
+        <article class="step-card reveal"><span>&#128228;</span><h3>Upload</h3><p>Staff sends scanned paper.</p></article>
+        <article class="step-card reveal"><span>&#128269;</span><h3>Parse</h3><p>Backend reads metadata.</p></article>
+        <article class="step-card reveal"><span>&#9989;</span><h3>Validate</h3><p>Identity and fields are checked.</p></article>
+        <article class="step-card reveal"><span>&#128230;</span><h3>Store</h3><p>Records and files persist.</p></article>
+        <article class="step-card reveal"><span>&#128229;</span><h3>Fetch</h3><p>Student dashboard loads data.</p></article>
+        <article class="step-card reveal"><span>&#128274;</span><h3>Verify</h3><p>Student confirms access.</p></article>
+        <article class="step-card reveal"><span>&#128228;</span><h3>Submit</h3><p>Moodle client sends payload.</p></article>
+        <article class="step-card reveal"><span>&#127891;</span><h3>Grade</h3><p>LMS gradebook receives result.</p></article>
       </div>
     </section>
 
     <section class="section divider" id="tech">
       <div class="section-heading reveal"><p class="eyebrow">Deep-Dive Pages</p><h2>Tech Stack</h2><p>Click each card to see why the technology was chosen, how it fits the project, and what its limits are.</p></div>
       <div class="card-grid tech-grid">
-        <a class="tech-card reveal" href="fastapi.html"><span class="tech-icon green">FA</span><h3>FastAPI</h3><p>Async API framework for routers, validation, and services.</p><em>Open deep dive</em></a>
-        <a class="tech-card reveal" href="postgresql.html"><span class="tech-icon blue">PG</span><h3>PostgreSQL</h3><p>Consistent relational database for users and submissions.</p><em>Open deep dive</em></a>
-        <a class="tech-card reveal" href="jwt.html"><span class="tech-icon purple">JW</span><h3>JWT Auth</h3><p>Stateless token model for secure portal access.</p><em>Open deep dive</em></a>
-        <a class="tech-card reveal" href="moodle.html"><span class="tech-icon green">ML</span><h3>Moodle LMS</h3><p>Industry LMS target for assignments and grades.</p><em>Open deep dive</em></a>
-        <a class="tech-card reveal" href="frontend.html"><span class="tech-icon blue">UI</span><h3>Frontend</h3><p>HTML, CSS, and JavaScript for fast portal screens.</p><em>Open deep dive</em></a>
-        <a class="tech-card reveal" href="render.html"><span class="tech-icon purple">RD</span><h3>Render</h3><p>Cloud deployment for the live project experience.</p><em>Open deep dive</em></a>
+        <a class="tech-card reveal" href="fastapi.html"><span class="tech-icon green">&#9889;</span><h3>FastAPI</h3><p>Async API framework for routers, validation, and services.</p><em>Open deep dive</em></a>
+        <a class="tech-card reveal" href="postgresql.html"><span class="tech-icon blue">&#128452;</span><h3>PostgreSQL</h3><p>Consistent relational database for users and submissions.</p><em>Open deep dive</em></a>
+        <a class="tech-card reveal" href="jwt.html"><span class="tech-icon purple">&#128274;</span><h3>JWT Auth</h3><p>Stateless token model for secure portal access.</p><em>Open deep dive</em></a>
+        <a class="tech-card reveal" href="moodle.html"><span class="tech-icon green">&#127891;</span><h3>Moodle LMS</h3><p>Industry LMS target for assignments and grades.</p><em>Open deep dive</em></a>
+        <a class="tech-card reveal" href="frontend.html"><span class="tech-icon blue">&#128421;</span><h3>Frontend</h3><p>HTML, CSS, and JavaScript for fast portal screens.</p><em>Open deep dive</em></a>
+        <a class="tech-card reveal" href="render.html"><span class="tech-icon purple">&#9729;</span><h3>Render</h3><p>Cloud deployment for the live project experience.</p><em>Open deep dive</em></a>
       </div>
     </section>
 
     <section class="section divider" id="credentials">
       <div class="section-heading reveal"><p class="eyebrow">Demo Access</p><h2>Credentials</h2><p>Copy any field and test the live staff, student, or LMS flow.</p></div>
       <div class="credential-grid">
-        <article class="credential-card reveal"><h3>Staff Portal Login</h3><div class="copy-row"><span>username</span><code>admin</code><button class="copy-btn" data-copy="admin">Copy</button></div><div class="copy-row"><span>passwd</span><code>1234</code><button class="copy-btn" data-copy="1234">Copy</button></div></article>
-        <article class="credential-card reveal"><h3>Student Portal Login 1</h3><div class="copy-row"><span>username</span><code>22008681</code><button class="copy-btn" data-copy="22008681">Copy</button></div><div class="copy-row"><span>passwd</span><code>8681</code><button class="copy-btn" data-copy="8681">Copy</button></div><div class="copy-row"><span>register number</span><code>212222240110</code><button class="copy-btn" data-copy="212222240110">Copy</button></div></article>
-        <article class="credential-card reveal"><h3>Student Portal Login 2</h3><div class="copy-row"><span>username</span><code>22007928</code><button class="copy-btn" data-copy="22007928">Copy</button></div><div class="copy-row"><span>passwd</span><code>7928</code><button class="copy-btn" data-copy="7928">Copy</button></div><div class="copy-row"><span>register number</span><code>212222240047</code><button class="copy-btn" data-copy="212222240047">Copy</button></div></article>
-        <article class="credential-card reveal"><h3>LMS Student 1</h3><div class="copy-row"><span>username</span><code>22008681</code><button class="copy-btn" data-copy="22008681">Copy</button></div><div class="copy-row"><span>passwd</span><code>8681</code><button class="copy-btn" data-copy="8681">Copy</button></div></article>
-        <article class="credential-card reveal"><h3>LMS Student 2</h3><div class="copy-row"><span>username</span><code>22007928</code><button class="copy-btn" data-copy="22007928">Copy</button></div><div class="copy-row"><span>passwd</span><code>7928</code><button class="copy-btn" data-copy="7928">Copy</button></div></article>
-        <article class="credential-card reveal"><h3>LMS Faculty Login</h3><div class="copy-row"><span>username</span><code>faculty</code><button class="copy-btn" data-copy="faculty">Copy</button></div><div class="copy-row"><span>passwd</span><code>123</code><button class="copy-btn" data-copy="123">Copy</button></div></article>
+        <article class="credential-card reveal"><h3>Staff Portal Login</h3><div class="copy-row"><span>username</span><code>admin</code><button class="copy-btn" data-copy="admin">Copy</button></div><div class="copy-row"><span>password</span><code>1234</code><button class="copy-btn" data-copy="1234">Copy</button></div></article>
+        <article class="credential-card reveal"><h3>Student Portal Login 1</h3><div class="copy-row"><span>username</span><code>22008681</code><button class="copy-btn" data-copy="22008681">Copy</button></div><div class="copy-row"><span>password</span><code>8681</code><button class="copy-btn" data-copy="8681">Copy</button></div><div class="copy-row"><span>register number</span><code>212222240110</code><button class="copy-btn" data-copy="212222240110">Copy</button></div></article>
+        <article class="credential-card reveal"><h3>Student Portal Login 2</h3><div class="copy-row"><span>username</span><code>22007928</code><button class="copy-btn" data-copy="22007928">Copy</button></div><div class="copy-row"><span>password</span><code>7928</code><button class="copy-btn" data-copy="7928">Copy</button></div><div class="copy-row"><span>register number</span><code>212222240047</code><button class="copy-btn" data-copy="212222240047">Copy</button></div></article>
+        <article class="credential-card reveal"><h3>LMS Student 1</h3><div class="copy-row"><span>username</span><code>22008681</code><button class="copy-btn" data-copy="22008681">Copy</button></div><div class="copy-row"><span>password</span><code>8681</code><button class="copy-btn" data-copy="8681">Copy</button></div></article>
+        <article class="credential-card reveal"><h3>LMS Student 2</h3><div class="copy-row"><span>username</span><code>22007928</code><button class="copy-btn" data-copy="22007928">Copy</button></div><div class="copy-row"><span>password</span><code>7928</code><button class="copy-btn" data-copy="7928">Copy</button></div></article>
+        <article class="credential-card reveal"><h3>LMS Faculty Login</h3><div class="copy-row"><span>username</span><code>faculty</code><button class="copy-btn" data-copy="faculty">Copy</button></div><div class="copy-row"><span>password</span><code>123</code><button class="copy-btn" data-copy="123">Copy</button></div></article>
       </div>
     </section>
 
@@ -137,15 +137,15 @@
     <section class="section divider" id="screenshots">
       <div class="section-heading reveal"><p class="eyebrow">Interface Tour</p><h2>User Interface Walkthrough</h2><p>Three user-facing experiences that make the middleware understandable in an interview demo.</p></div>
       <div class="screenshot-grid">
-        <figure class="screenshot-card reveal"><img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80" alt="Staff workspace preview placeholder"><figcaption>Staff UI</figcaption></figure>
-        <figure class="screenshot-card reveal"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80" alt="Student dashboard preview placeholder"><figcaption>Student UI</figcaption></figure>
-        <figure class="screenshot-card reveal"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80" alt="Learning dashboard preview placeholder"><figcaption>LMS UI</figcaption></figure>
+        <figure class="screenshot-card reveal"><img src="Staff-login.png" alt="Staff workspace preview placeholder"><figcaption>Staff UI</figcaption></figure>
+        <figure class="screenshot-card reveal"><img src="Student-login.png" alt="Student dashboard preview placeholder"><figcaption>Student UI</figcaption></figure>
+        <figure class="screenshot-card reveal"><img src="lms-login.png" alt="Learning dashboard preview placeholder"><figcaption>LMS UI</figcaption></figure>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <div><a class="brand" href="#top"><span class="brand-mark">EN</span><span>ExamFlow Nexus</span></a><p>FastAPI middleware connecting scanned papers, student verification, resilient submissions, and Moodle LMS.</p></div>
+    <div><a class="brand" href="#top"><span class="brand-mark">&#128279;</span><span>Examination Middleware</span></a><p>FastAPI middleware connecting scanned papers, student verification, resilient submissions, and Moodle LMS.</p></div>
     <div class="footer-links"><a href="#about">About</a><a href="#features">Features</a><a href="#architecture">Architecture</a><a href="#tech">Tech Stack</a><a href="#demo">Live Demo</a><a href="#top">Back to top</a></div>
   </footer>
 
